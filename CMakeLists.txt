@@ -3,6 +3,6 @@ project(Interpreter)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES interpreter_app.cpp Lex.cpp Lex.h parser.cpp parser.h scanner.cpp scanner.h)
+set(SOURCE_FILES interpreter_app.cpp Lex.cpp Lex.h parser.cpp parser.h scanner.cpp scanner.h lex_t.h)
 
 add_executable(Interpreter ${SOURCE_FILES})

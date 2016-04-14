@@ -14,11 +14,16 @@ Scanner::Scanner(const char* input_f): lex_vec(0, Lex()), buffer(){
     // TODO сдесь должен быть gc();
 }
 
+inline void Scanner::gc(){
+    c = fgetc(f);
+}
+
+inline void Scanner::addc(){
+    buffer += c;
+}
+
 void Scanner::add_lex(Lex& cur_lex){
     lex_vec.push_back(cur_lex);
-}
-Lex Scanner::get_last_lex(){
-    return lex_vec.back();
 }
 
 void Scanner::print_vec(){
@@ -33,4 +38,14 @@ void Scanner::print_vec(){
 
 void Scanner::clear_buffer(){
     buffer.clear();
+}
+
+int Scanner::look(string buf, string table[]){
+    int i = 0;
+
+    while(table[i].compare("__t_end")){
+        if(!buf.compare(table[i])) return i;
+        ++i;
+    }
+    return 0;
 }

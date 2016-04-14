@@ -4,7 +4,7 @@
 
 #include "Lex.h"
 
-Lex::Lex(): type(LEX_0), ptr(0) {}
+Lex::Lex(): type(LEX_NULL), ptr(0) {}
 Lex::Lex(lex_t type_par, int ptr_par): type(type_par), ptr(ptr_par) {}
 Lex::Lex(const Lex& lex_par): type(lex_par.type), ptr(lex_par.ptr){};
 Lex::~Lex(){};

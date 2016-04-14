@@ -9,16 +9,9 @@
 #include <string>
 #include <iomanip>
 #include <ostream>
+#include "lex_t.h"
 
 using namespace std;
-
-typedef enum{
-    LEX_0,
-    lex1,
-    lex2
-} lex_t;
-
-
 
 class Lex{
     lex_t type;
@@ -32,5 +25,4 @@ public:
     friend ostream& operator<<(ostream& o, Lex& lex_par);
 
 };
-
 
