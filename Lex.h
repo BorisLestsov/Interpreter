@@ -7,13 +7,18 @@
 
 #define NAME_LENGTH 32
 
-typedef enum{} lex_t;
+#include <string>
+
+typedef enum{
+    lex1,
+    lex2
+} lex_t;
 
 class Lex{
     lex_t type;
-    char name[NAME_LENGTH];
+    string name[NAME_LENGTH];
 public:
-    Lex();
+    Lex(lex_t lex_type, char* name);
     Lex(Lex &);
     ~Lex();
 
