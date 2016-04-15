@@ -23,7 +23,6 @@ public:
 class ID_table_t {
     vector<ID> table;
 public:
-   // inline string get_name(int i) const;
     int append(const string&);
     void print_table();
 };

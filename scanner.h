@@ -20,15 +20,16 @@ class Scanner{
     char c;
     string buffer;
 
-    //здесь ли это должно быть?
-
-    //функциии
-    inline void add_lex(Lex& cur_lex);
+    //functions
     inline void gc();
     inline void clear_buffer();
     inline void addc();
     int look(const string buf, const string table[]);
 public:
+    static const string WORD_NAMES[];
+    static const string DEL_NAMES[];
+    static const lex_t WORD_LEXEMS[];
+    static const lex_t DEL_LEXEMS[];
     static ID_table_t ID_TABLE;
 
     Scanner(const char* input_f);

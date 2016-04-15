@@ -16,19 +16,15 @@ using namespace std;
 
 class Lex{
     lex_t type;
-    const string* table_ptr;
     int value;
 
 public:
-    static const string WORD_NAMES[];
-    static const string DEL_NAMES[];
-    static const lex_t WORD_LEXEMS[];
-    static const lex_t DEL_LEXEMS[];
-
     Lex();
-    Lex(lex_t type_par, const string* table_ptr_par = WORD_NAMES, int value_par = 0);
+    Lex(lex_t type_par, int value_par = 0);
     Lex(const Lex &);
     ~Lex();
+    inline lex_t get_type();
+    inline int get_value();
 
-    friend ostream& operator<<(ostream& o, Lex& lex_par);
+    friend ostream& operator<<(ostream& o, const Lex& lex_par);
 };

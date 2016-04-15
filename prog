@@ -1,1 +1,11 @@
-fff
+program hello_world 
+var
+i: int;
+j: bool;
+begin
+i := 150;
+j := true;
+i := j;
+if(i = j)
+else i := j
+end;

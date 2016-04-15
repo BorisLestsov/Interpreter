@@ -28,10 +28,6 @@ inline void Scanner::addc(){
     buffer += c;
 }
 
-void Scanner::add_lex(Lex& cur_lex){
-    lex_vec.push_back(cur_lex);
-}
-
 void Scanner::print_vec(){
     vector<Lex>::iterator ptr;
 
@@ -59,7 +55,7 @@ int Scanner::look(const string buf, const string table[]){
 void Scanner::start(){
     int d, j;
 
-    STATE = H_ST; //в методичке не так
+    STATE = H_ST;
     do {
         gc();
         switch (STATE) {
@@ -92,22 +88,114 @@ void Scanner::start(){
                 if (isalpha(c) || isdigit(c))
                     addc ();
                 else
-                if ((j = look(buffer, Lex::WORD_NAMES)) != 0)
-                    lex_vec.push_back(Lex(Lex::WORD_LEXEMS[j], Lex::WORD_NAMES, j));
+                if ((j = look(buffer, WORD_NAMES)) != 0)
+                    lex_vec.push_back(Lex(WORD_LEXEMS[j], j));
                 else
                 {
                     j = ID_TABLE.append(buffer);
-                    lex_vec.push_back(Lex (LEX_ID, NULL, j));
+                    lex_vec.push_back(Lex(LEX_ID, j));
                 }
                 break;
             case NUMB_ST:
                 if(isdigit(c))
                     d = d * 10 + (c - '0');
                 else
-                    lex_vec.push_back(Lex (LEX_NUM, NULL, d));
+                    lex_vec.push_back(Lex (LEX_NUM, d));
                 break;
             default:
                 return;
         }
     } while (true);
 }
+
+
+//tables
+const string Scanner::WORD_NAMES[] = {
+        "",
+        "and",
+        "begin",
+        "bool",
+        "do",
+        "else",
+        "end",
+        "if",
+        "false",
+        "int",
+        "not",
+        "or",
+        "program",
+        "read",
+        "then",
+        "true",
+        "var",
+        "while",
+        "write",
+        TBL_END
+};
+
+const string Scanner::DEL_NAMES[] = {
+        "",
+        "@",
+        ";",
+        ",",
+        ":",
+        ":=",
+        "(",
+        ")",
+        "=",    //поменять
+        "<",
+        ">",
+        "+",
+        "-",
+        "*",
+        "/",
+        "<=",
+        "!=",
+        ">=",
+        TBL_END
+};
+
+const lex_t Scanner::WORD_LEXEMS[] = {
+        LEX_NULL,
+        LEX_AND,
+        LEX_BEGIN,
+        LEX_BOOL,
+        LEX_DO,
+        LEX_ELSE,
+        LEX_END,
+        LEX_IF,
+        LEX_FALSE,
+        LEX_INT,
+        LEX_NOT,
+        LEX_OR,
+        LEX_PROGRAM,
+        LEX_READ,
+        LEX_THEN,
+        LEX_TRUE,
+        LEX_VAR,
+        LEX_WHILE,
+        LEX_WRITE,
+        LEX_NULL
+};
+
+const lex_t Scanner::DEL_LEXEMS[] = {
+        LEX_NULL,
+        LEX_FIN,
+        LEX_SEMICOLON,
+        LEX_COMMA,
+        LEX_COLON,
+        LEX_ASSIGN,
+        LEX_LPAREN,
+        LEX_RPAREN,
+        LEX_EQ,
+        LEX_LSS,
+        LEX_GTR,
+        LEX_PLUS,
+        LEX_MINUS,
+        LEX_TIMES,
+        LEX_SLASH,
+        LEX_LEQ,
+        LEX_NEQ,
+        LEX_GEQ,
+        LEX_NULL
+};

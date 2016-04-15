@@ -3,16 +3,14 @@
 //
 #include "scanner.h"
 
-//TODO: порасставлять const и &
+int main(int argc, char* argv[]){
+    //try {
+       // if(argc < 2) throw -1;
+        Scanner main_scanner(argv[1]);
 
-int main(){
-    Scanner main_scanner("prog");
+        main_scanner.start();
 
-    cout << main_scanner.ID_TABLE.append("hello") << endl;
-    cout << main_scanner.ID_TABLE.append("hel") << endl;
-    cout << main_scanner.ID_TABLE.append("hello") << endl;
-
-    main_scanner.ID_TABLE.print_table();
-
+    //}
+    //catch(int){ return -1;}
     return 0;
 }
