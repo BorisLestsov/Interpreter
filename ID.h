@@ -6,6 +6,7 @@
 #include "Lex.h"
 #include <vector>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ class ID{
     lex_t type;
     string name;
 public:
-    ID(lex_t lex_par, string& name_par);
+    ID(lex_t lex_par, const string& name_par);
     ID(lex_t lex_par, const char* name_par);
 
     inline string get_name() const;
@@ -22,6 +23,7 @@ public:
 class ID_table_t {
     vector<ID> table;
 public:
-    inline string get_name(int i) const;
-    void add(ID id_par);
+   // inline string get_name(int i) const;
+    int append(const string&);
+    void print_table();
 };

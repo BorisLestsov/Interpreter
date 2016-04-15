@@ -12,11 +12,12 @@ Lex::~Lex(){};
 
 ostream& operator<<(ostream& o, Lex& lex_par){
     o << setw(5) << lex_par.type << setw(10);
-    if(lex_par.type != LEX_ID)
+    if(lex_par.type != LEX_ID && lex_par.type != LEX_NUM)
         o << lex_par.table_ptr[lex_par.value];
-    else
+    else if(lex_par.type == LEX_ID)
         //o << ID_TABLE.get_name(lex_par.value);
         o << "ID # " << lex_par.value;
+    else o << lex_par.value;
 }
 
 
@@ -53,7 +54,7 @@ const string DEL_NAMES[] = {
         ":=",
         "(",
         ")",
-        "=",
+        "=",    //поменять
         "<",
         ">",
         "+",

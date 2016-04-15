@@ -27,11 +27,12 @@ class Scanner{
     inline void gc();
     inline void clear_buffer();
     inline void addc();
-    int look(string buf, string table[]);
+    int look(const string buf, const string table[]);
 public:
     static ID_table_t ID_TABLE;
 
     Scanner(const char* input_f);
+    Scanner();
     void print_vec();
     void start();
 };

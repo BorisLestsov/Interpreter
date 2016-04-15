@@ -26,7 +26,7 @@ public:
     static const lex_t DEL_LEXEMS[];
 
     Lex();
-    Lex(lex_t type_par, const string* table_ptr_par, int value_par);
+    Lex(lex_t type_par, const string* table_ptr_par = WORD_NAMES, int value_par = 0);
     Lex(const Lex &);
     ~Lex();
 

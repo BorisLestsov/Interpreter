@@ -5,17 +5,23 @@
 #include <iostream>
 #include "scanner.h"
 
-
 using namespace std;
 
-Scanner::Scanner(const char* input_f): lex_vec(0, Lex()), buffer(){
+ID_table_t Scanner::ID_TABLE;
+
+Scanner::Scanner(): lex_vec(0, Lex()) {
+    clear_buffer();
+    STATE = H_ST;
+}
+
+Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
     f = fopen(input_f, "r");
     clear_buffer();
     STATE = H_ST;
 }
 
 inline void Scanner::gc(){
-    c = fgetc(f);
+    c = (char) fgetc(f);
 }
 
 inline void Scanner::addc(){
@@ -40,7 +46,7 @@ void Scanner::clear_buffer(){
     buffer.clear();
 }
 
-int Scanner::look(string buf, string table[]){
+int Scanner::look(const string buf, const string table[]){
     int i = 0;
 
     while(table[i].compare(TBL_END)){
@@ -51,7 +57,7 @@ int Scanner::look(string buf, string table[]){
 }
 
 void Scanner::start(){
-    int d;
+    int d, j;
 
     STATE = H_ST; //в методичке не так
     do {
@@ -67,10 +73,41 @@ void Scanner::start(){
                 } else if(isdigit(c)){
                     STATE = NUMB_ST;
                     d = c - '0';
-                } //else if()
+                } else if(c == '{'){
+                    STATE = COM_ST;
+                } else if(c == ':' || c == '<' || c == '>'){
+                    STATE = ALE_ST;
+                    clear_buffer();
+                    addc();
+                } else if(c == '@'){
+                    lex_vec.push_back(Lex(LEX_FIN));
+                    return;
+                } else if(c == '!'){
+                    STATE = NEQ_ST;
+                    clear_buffer();
+                    addc();
+                }
                 break;
-            default: return;
+            case ID_ST:
+                if (isalpha(c) || isdigit(c))
+                    addc ();
+                else
+                if ((j = look(buffer, Lex::WORD_NAMES)) != 0)
+                    lex_vec.push_back(Lex(Lex::WORD_LEXEMS[j], Lex::WORD_NAMES, j));
+                else
+                {
+                    j = ID_TABLE.append(buffer);
+                    lex_vec.push_back(Lex (LEX_ID, NULL, j));
+                }
+                break;
+            case NUMB_ST:
+                if(isdigit(c))
+                    d = d * 10 + (c - '0');
+                else
+                    lex_vec.push_back(Lex (LEX_NUM, NULL, d));
+                break;
+            default:
+                return;
         }
     } while (true);
-
 }

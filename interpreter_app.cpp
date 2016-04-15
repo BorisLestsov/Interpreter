@@ -2,17 +2,17 @@
 // Created by Boris on 10.04.2016.
 //
 #include "scanner.h"
-#include <iostream>
 
 //TODO: порасставлять const и &
 
-int main(int argc, char* argv[]){
-    //Scanner main_scanner(argv[1]);
+int main(){
+    Scanner main_scanner("prog");
 
-    Lex l1;
-    Lex l2(LEX_ID, NULL, 1);
+    cout << main_scanner.ID_TABLE.append("hello") << endl;
+    cout << main_scanner.ID_TABLE.append("hel") << endl;
+    cout << main_scanner.ID_TABLE.append("hello") << endl;
 
-    cout << l1 << endl << l2 << endl;
+    main_scanner.ID_TABLE.print_table();
 
     return 0;
 }
