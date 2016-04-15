@@ -11,12 +11,12 @@ Lex::Lex(const Lex& lex_par): type(lex_par.type), table_ptr(lex_par.table_ptr), 
 Lex::~Lex(){};
 
 ostream& operator<<(ostream& o, Lex& lex_par){
-    
-        o << setw(5) << lex_par.type << setw(10);
-    if(type != LEX_ID)
+    o << setw(5) << lex_par.type << setw(10);
+    if(lex_par.type != LEX_ID)
         o << lex_par.table_ptr[lex_par.value];
-    else 
-        o << ID_TABLE.get_name(lex_par.value);
+    else
+        //o << ID_TABLE.get_name(lex_par.value);
+        o << "ID # " << lex_par.value;
 }
 
 

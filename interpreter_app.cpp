@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){
     //Scanner main_scanner(argv[1]);
 
     Lex l1;
-    Lex l2(LEX_ID, Lex::IDs, 1);
+    Lex l2(LEX_ID, NULL, 1);
 
     cout << l1 << endl << l2 << endl;
 

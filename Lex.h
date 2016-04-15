@@ -11,8 +11,6 @@
 #include <iomanip>
 #include <ostream>
 #include "lex_t.h"
-#include "ID.h" 
-
 
 using namespace std;
 
@@ -34,5 +32,3 @@ public:
 
     friend ostream& operator<<(ostream& o, Lex& lex_par);
 };
-
-extern ID_table_t ID_TABLE;
