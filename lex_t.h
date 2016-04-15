@@ -5,6 +5,7 @@
 #pragma once
 
 enum lex_t {
+    LEX_NULL,
     LEX_AND,
     LEX_BEGIN,
     LEX_BOOL,
@@ -40,5 +41,6 @@ enum lex_t {
     LEX_LEQ,
     LEX_NEQ,
     LEX_GEQ,
-    LEX_NULL
+    LEX_NUM,
+    LEX_ID
 };

@@ -11,7 +11,7 @@ using namespace std;
 Scanner::Scanner(const char* input_f): lex_vec(0, Lex()), buffer(){
     f = fopen(input_f, "r");
     clear_buffer();
-    // TODO сдесь должен быть gc();
+    STATE = H_ST;
 }
 
 inline void Scanner::gc(){
@@ -43,9 +43,34 @@ void Scanner::clear_buffer(){
 int Scanner::look(string buf, string table[]){
     int i = 0;
 
-    while(table[i].compare("__t_end")){
+    while(table[i].compare(TBL_END)){
         if(!buf.compare(table[i])) return i;
         ++i;
     }
     return 0;
+}
+
+void Scanner::start(){
+    int d;
+
+    STATE = H_ST; //в методичке не так
+    do {
+        gc();
+        switch (STATE) {
+            case H_ST:
+                if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
+                    gc();
+                } else if (isalpha(c)){
+                    STATE = ID_ST;
+                    clear_buffer();
+                    addc();
+                } else if(isdigit(c)){
+                    STATE = NUMB_ST;
+                    d = c - '0';
+                } //else if()
+                break;
+            default: return;
+        }
+    } while (true);
+
 }
