@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <ostream>
 #include "lex_t.h"
+#include <map>
 
 using namespace std;
 
@@ -23,8 +24,8 @@ public:
     Lex(lex_t type_par, int value_par = 0);
     Lex(const Lex &);
     ~Lex();
-    inline lex_t get_type();
-    inline int get_value();
+    lex_t get_type() const;
+    int get_value() const;
 
     friend ostream& operator<<(ostream& o, const Lex& lex_par);
 };

@@ -11,10 +11,11 @@ Lex::Lex(lex_t type_par, int value_par):
 Lex::Lex(const Lex& lex_par): type(lex_par.type), value(lex_par.value){};
 Lex::~Lex(){};
 
-lex_t Lex::get_type(){
+lex_t Lex::get_type() const {
     return type;
 }
-int Lex::get_value(){
+
+int Lex::get_value() const {
     return value;
 }
 

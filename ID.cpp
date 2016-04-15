@@ -11,6 +11,11 @@ string ID::get_name() const{
     return name;
 }
 
+lex_t ID::get_type() const{
+    return type;
+}
+
+
 /*
 string ID_table_t::get_name(int i) const{
     return table[i].get_name();
@@ -31,12 +36,13 @@ int ID_table_t::append(const string& new_id){
     return i;
 }
 
-void ID_table_t::print_table(){
+void ID_table_t::print_table() const{
     vector<ID>::const_iterator ptr = table.cbegin();
     vector<ID>::const_iterator end  = table.cend();
 
+    cout << "FOUND IDENTIFIERS:" << endl;
     while(ptr != end){
-        cout << ptr->get_name() << endl;
+        cout << setw(10) << ptr->get_type() << setw(15) <<ptr->get_name() << endl;
         ++ptr;
     }
 }

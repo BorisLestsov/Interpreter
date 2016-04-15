@@ -18,11 +18,12 @@ public:
     ID(lex_t lex_par, const char* name_par);
 
     inline string get_name() const;
+    inline lex_t get_type() const;
 };
 
 class ID_table_t {
     vector<ID> table;
 public:
     int append(const string&);
-    void print_table();
+    void print_table() const;
 };

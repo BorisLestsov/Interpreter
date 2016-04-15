@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <unistd.h>
 #include "scanner.h"
 
 using namespace std;
@@ -16,6 +17,7 @@ Scanner::Scanner(): lex_vec(0, Lex()) {
 
 Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
     f = fopen(input_f, "r");
+    if(f == NULL) throw -1;
     clear_buffer();
     STATE = H_ST;
 }
@@ -31,9 +33,11 @@ inline void Scanner::addc(){
 void Scanner::print_vec(){
     vector<Lex>::iterator ptr;
 
+    cout << "LEXEMS:" << endl;
     ptr = lex_vec.begin();
     while(ptr != lex_vec.cend()){
-        cout << *ptr << endl;
+        //cout << *ptr << endl;
+        cout << setw(10) << lex_map[ptr->get_type()] << setw(15) << ptr->get_value() << endl;
         ptr++;
     }
 }
@@ -58,11 +62,12 @@ void Scanner::start(){
     STATE = H_ST;
     do {
         gc();
+        //usleep(250000);
+        //cout << c << ' ' << STATE <<  endl;
         switch (STATE) {
             case H_ST:
-                if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
-                    gc();
-                } else if (isalpha(c)){
+                if (!(c == ' ' || c == '\n' || c == '\t' || c == '\r'))
+                    if (isalpha(c)){
                     STATE = ID_ST;
                     clear_buffer();
                     addc();
@@ -87,19 +92,22 @@ void Scanner::start(){
             case ID_ST:
                 if (isalpha(c) || isdigit(c))
                     addc ();
-                else
-                if ((j = look(buffer, WORD_NAMES)) != 0)
-                    lex_vec.push_back(Lex(WORD_LEXEMS[j], j));
-                else
-                {
-                    j = ID_TABLE.append(buffer);
-                    lex_vec.push_back(Lex(LEX_ID, j));
+                else {
+                    j = look(buffer, WORD_NAMES);
+                    STATE = H_ST;
+                    if (j != 0)
+                        lex_vec.push_back(Lex(WORD_LEXEMS[j], j));
+                    else {
+                        j = ID_TABLE.append(buffer);
+                        lex_vec.push_back(Lex(LEX_ID, j));
+                    }
                 }
                 break;
             case NUMB_ST:
                 if(isdigit(c))
                     d = d * 10 + (c - '0');
                 else
+                    STATE = H_ST;
                     lex_vec.push_back(Lex (LEX_NUM, d));
                 break;
             default:
@@ -199,3 +207,16 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_GEQ,
         LEX_NULL
 };
+
+map<lex_t, string> Scanner::lex_map;
+
+void Scanner::construct_lex_map(){
+    int  i;
+    lex_map.insert(make_pair(LEX_NULL, WORD_NAMES[0]));
+    lex_map.insert(make_pair(LEX_NUM, "LEX_NUM"));
+    lex_map.insert(make_pair(LEX_ID, "LEX_ID"));
+    for(i = 1; WORD_LEXEMS[i] != LEX_NULL; ++i)
+        lex_map.insert(make_pair(WORD_LEXEMS[i], WORD_NAMES[i]));
+    for(i = 1; DEL_LEXEMS[i] != LEX_NULL; ++i)
+        lex_map.insert(make_pair(DEL_LEXEMS[i], DEL_NAMES[i]));
+}

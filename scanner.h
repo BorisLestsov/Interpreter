@@ -6,7 +6,6 @@
 
 #include "Lex.h"
 #include <vector>
-#include <fstream>
 #include "ID.h"
 
 using namespace std;
@@ -31,6 +30,9 @@ public:
     static const lex_t WORD_LEXEMS[];
     static const lex_t DEL_LEXEMS[];
     static ID_table_t ID_TABLE;
+
+    static map<lex_t, string> lex_map;
+    void construct_lex_map();
 
     Scanner(const char* input_f);
     Scanner();

@@ -1,11 +1,15 @@
-program hello_world 
+program helloworld 
 var
 i: int;
 j: bool;
+8
 begin
 i := 150;
 j := true;
 i := j;
+8
 if(i = j)
 else i := j
-end;
+end
+8
+@
