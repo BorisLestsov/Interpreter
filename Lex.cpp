@@ -3,12 +3,23 @@
 //
 
 #include "Lex.h"
+#include "scanner.h"
 
-Lex::Lex(): type(LEX_NULL), ptr(0) {}
-Lex::Lex(lex_t type_par, int ptr_par): type(type_par), ptr(ptr_par) {}
-Lex::Lex(const Lex& lex_par): type(lex_par.type), ptr(lex_par.ptr){};
+Lex::Lex(): type(LEX_NULL) , value(0) {}
+Lex::Lex(lex_t type_par, int value_par):
+    type(type_par), value(value_par){}
+Lex::Lex(const Lex& lex_par): type(lex_par.type), value(lex_par.value){};
 Lex::~Lex(){};
 
-ostream& operator<<(ostream& o, Lex& lex_par){
-    o << setw(5) << lex_par.type << setw(5) << lex_par.ptr;
+lex_t Lex::get_type() const {
+    return type;
 }
+
+int Lex::get_value() const {
+    return value;
+}
+
+ostream& operator<<(ostream& o, const Lex& lex_par){
+    o << setw(5) << lex_par.type << setw(10)  << lex_par.value;
+}
+
