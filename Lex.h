@@ -13,6 +13,8 @@
 #include "lex_t.h"
 #include <map>
 
+void operator++(lex_t& i);
+
 using namespace std;
 
 class Lex{

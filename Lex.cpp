@@ -23,3 +23,6 @@ ostream& operator<<(ostream& o, const Lex& lex_par){
     o << setw(5) << lex_par.type << setw(10)  << lex_par.value;
 }
 
+void operator++(lex_t& i ){
+    i = (lex_t) ((int) i + 1 );
+}

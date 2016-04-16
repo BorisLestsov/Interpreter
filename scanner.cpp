@@ -208,15 +208,62 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_NULL
 };
 
+//посмотреть результат
+
+string debug[]{
+        "LEX_NULL",
+        "LEX_AND",
+        "LEX_BEGIN",
+        "LEX_BOOL",
+        "LEX_DO",
+        "LEX_ELSE",
+        "LEX_END",
+        "LEX_IF",
+        "LEX_FALSE",
+        "LEX_INT",
+        "LEX_NOT",
+        "LEX_OR",
+        "LEX_PROGRAM",
+        "LEX_READ",
+        "LEX_THEN",
+        "LEX_TRUE",
+        "LEX_VAR",
+        "LEX_WHILE",
+        "LEX_WRITE",
+        "LEX_FIN",
+        "LEX_SEMICOLON",
+        "LEX_COMMA",
+        "LEX_COLON",
+        "LEX_ASSIGN",
+        "LEX_LPAREN",
+        "LEX_RPAREN",
+        "LEX_EQ",
+        "LEX_LSS",
+        "LEX_GTR",
+        "LEX_PLUS",
+        "LEX_MINUS",
+        "LEX_TIMES",
+        "LEX_SLASH",
+        "LEX_LEQ",
+        "LEX_NEQ",
+        "LEX_GEQ",
+        "LEX_NUM",
+        "LEX_ID",
+};
+
 map<lex_t, string> Scanner::lex_map;
 
 void Scanner::construct_lex_map(){
-    int  i;
-    lex_map.insert(make_pair(LEX_NULL, WORD_NAMES[0]));
+    lex_t i;
+    /*lex_map.insert(make_pair(LEX_NULL, WORD_NAMES[0]));
     lex_map.insert(make_pair(LEX_NUM, "LEX_NUM"));
     lex_map.insert(make_pair(LEX_ID, "LEX_ID"));
     for(i = 1; WORD_LEXEMS[i] != LEX_NULL; ++i)
         lex_map.insert(make_pair(WORD_LEXEMS[i], WORD_NAMES[i]));
     for(i = 1; DEL_LEXEMS[i] != LEX_NULL; ++i)
-        lex_map.insert(make_pair(DEL_LEXEMS[i], DEL_NAMES[i]));
+        lex_map.insert(make_pair(DEL_LEXEMS[i], DEL_NAMES[i]));*/
+    for(i = LEX_NULL; i != LEX_ID; ++i){
+        lex_map.insert(make_pair(i , debug[i]));
+    }
+    lex_map.insert(make_pair(i, debug[i]));
 }
