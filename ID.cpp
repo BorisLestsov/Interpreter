@@ -21,7 +21,7 @@ string ID_table_t::get_name(int i) const{
     return table[i].get_name();
 }*/
 
-int ID_table_t::append(const string& new_id){
+int ID_table_t::append(const string &new_id, lex_t type_par) {
     int i = 0;
     vector<ID>::const_iterator ptr = table.cbegin();
     vector<ID>::const_iterator end  = table.cend();
@@ -32,7 +32,7 @@ int ID_table_t::append(const string& new_id){
         ++i;
         ++ptr;
     }
-    table.push_back(ID(LEX_ID, new_id));
+    table.push_back(ID(type_par, new_id));
     return i;
 }
 

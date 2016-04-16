@@ -1,15 +1,10 @@
-program helloworld 
-var
-i: int;
-j: bool;
-8
-begin
-i := 150;
-j := true;
-i := j;
-8
-if(i = j)
-else i := j
-end
-8
+program 
+{
+int x = -015;
+string str1 = "hel\"lo\t\? man\"", str2;
+/*comment *
+here */
+write(x);
+//another comment /*
+}
 @
