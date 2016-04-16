@@ -56,27 +56,34 @@ int Scanner::look(const string buf, const string table[]){
     return 0;
 }
 
-void Scanner::start(){
+void Scanner::start() throw(char){
     int d, j;
+    string s;
 
     STATE = H_ST;
     do {
         gc();
         //usleep(250000);
-        //cout << c << ' ' << STATE <<  endl;
+        cout << c << ' ' << STATE <<  endl;
         switch (STATE) {
             case H_ST:
                 if (!(c == ' ' || c == '\n' || c == '\t' || c == '\r'))
-                    if (isalpha(c)){
+                    if (isalpha(c)|| c == '\"'){
                     STATE = ID_ST;
                     clear_buffer();
                     addc();
                 } else if(isdigit(c)){
                     STATE = NUMB_ST;
                     d = c - '0';
+                //} else if(c == '{'){
+                   // STATE = COM_ST;
                 } else if(c == '{'){
-                    STATE = COM_ST;
-                } else if(c == ':' || c == '<' || c == '>'){
+                    lex_vec.push_back(Lex(LEX_BEGIN, 2));
+                } else if(c == '}'){
+                    lex_vec.push_back(Lex(LEX_END, 6));
+                } else if(c == ';'){
+                    lex_vec.push_back(Lex(LEX_SEMICOLON, 2));
+                } else if(c == '<' || c == '>' || c == '='){
                     STATE = ALE_ST;
                     clear_buffer();
                     addc();
@@ -87,10 +94,12 @@ void Scanner::start(){
                     STATE = NEQ_ST;
                     clear_buffer();
                     addc();
+                //} else if(c == '#'){
+                //    STATE = MACRO_ST;
                 }
                 break;
             case ID_ST:
-                if (isalpha(c) || isdigit(c))
+                if (isalpha(c) || isdigit(c) || c == '\"')
                     addc ();
                 else {
                     j = look(buffer, WORD_NAMES);
@@ -110,8 +119,34 @@ void Scanner::start(){
                     STATE = H_ST;
                     lex_vec.push_back(Lex (LEX_NUM, d));
                 break;
+            /*case COM_ST:
+                if(c == '}') {
+                    lex_vec.push_back(Lex(LEX_END, 0));
+                    STATE = H_ST;
+                } else if(c == '{' || c == '@')
+                    throw c;
+                STATE =
+                break;*/
+            case ALE_ST:
+                if (c == '=') {
+                    addc();
+                    j = look (buffer, DEL_NAMES);
+                    if(j == 8) throw (c);
+                    lex_vec.push_back(Lex (DEL_LEXEMS[j], j));
+                } else {
+                    j = look (buffer, DEL_NAMES);
+                    lex_vec.push_back(Lex (DEL_LEXEMS[j], j));
+                }
+                STATE = H_ST;
+                break;
+            case MACRO_ST:
+                /*while(c != '\n'){
+                    gc();
+                    s += c}
+                if(!s.compare(0,5, "define")) throw 'd';
             default:
-                return;
+                throw c;*/
+                 break;
         }
     } while (true);
 }
@@ -121,14 +156,15 @@ void Scanner::start(){
 const string Scanner::WORD_NAMES[] = {
         "",
         "and",
-        "begin",
+        "{",
         "bool",
         "do",
         "else",
-        "end",
+        "}",
         "if",
         "false",
         "int",
+        "string",
         "not",
         "or",
         "program",
@@ -147,10 +183,10 @@ const string Scanner::DEL_NAMES[] = {
         ";",
         ",",
         ":",
-        ":=",
+        "=",
         "(",
         ")",
-        "=",    //поменять
+        "==",
         "<",
         ">",
         "+",
@@ -174,6 +210,7 @@ const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_IF,
         LEX_FALSE,
         LEX_INT,
+        LEX_STRING,
         LEX_NOT,
         LEX_OR,
         LEX_PROGRAM,
@@ -192,10 +229,10 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_SEMICOLON,
         LEX_COMMA,
         LEX_COLON,
-        LEX_ASSIGN,
+        LEX_EQ,
         LEX_LPAREN,
         LEX_RPAREN,
-        LEX_EQ,
+        LEX_ASSIGN,
         LEX_LSS,
         LEX_GTR,
         LEX_PLUS,
@@ -221,6 +258,7 @@ string debug[]{
         "LEX_IF",
         "LEX_FALSE",
         "LEX_INT",
+        "LEX_STRING",
         "LEX_NOT",
         "LEX_OR",
         "LEX_PROGRAM",
@@ -234,10 +272,10 @@ string debug[]{
         "LEX_SEMICOLON",
         "LEX_COMMA",
         "LEX_COLON",
-        "LEX_ASSIGN",
+        "LEX_EQ",
         "LEX_LPAREN",
         "LEX_RPAREN",
-        "LEX_EQ",
+        "LEX_ASSIGN",
         "LEX_LSS",
         "LEX_GTR",
         "LEX_PLUS",

@@ -1,15 +1,6 @@
-program helloworld 
-var
-i: int;
-j: bool;
-8
-begin
-i := 150;
-j := true;
-i := j;
-8
-if(i = j)
-else i := j
-end
-8
+program helloworld {
+int x = 1;
+string str1 = ", str2;
+write(x);
+}
 @

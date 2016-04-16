@@ -11,7 +11,7 @@
 using namespace std;
 
 class Scanner{
-    enum state_t {H_ST, ID_ST, NUMB_ST, COM_ST, ALE_ST, DELIM_ST, NEQ_ST };
+    enum state_t {H_ST, ID_ST, NUMB_ST, COM_ST, ALE_ST, DELIM_ST, NEQ_ST, WRD_ST, MACRO_ST};
     state_t STATE;
     vector<Lex> lex_vec;
     FILE* f;
@@ -31,11 +31,12 @@ public:
     static const lex_t DEL_LEXEMS[];
     static ID_table_t ID_TABLE;
 
+
     static map<lex_t, string> lex_map;
     void construct_lex_map();
 
     Scanner(const char* input_f);
     Scanner();
     void print_vec();
-    void start();
+    void start() throw(char);
 };
