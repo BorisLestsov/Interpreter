@@ -14,6 +14,6 @@ int main(int argc, char* argv[]){
         main_scanner.ID_TABLE.print_table();
     }
     catch (int){ return -1;}
-    catch (char c){cerr << "unknown symbol: " << c <<endl; return -1;}
+    catch (char c){cerr << "wrong symbol: " << c <<endl; return -1;}
     return 0;
 }

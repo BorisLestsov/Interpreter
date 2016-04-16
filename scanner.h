@@ -11,7 +11,7 @@
 using namespace std;
 
 class Scanner{
-    enum state_t {H_ST, ID_ST, NUMB_ST, COM_ST, ALE_ST, DELIM_ST, NEQ_ST, WRD_ST, MACRO_ST};
+    enum state_t {H_ST, ID_ST, NUMB_ST, STR_ST, COM_ST, ALE_ST, DELIM_ST, NEQ_ST};
     state_t STATE;
     vector<Lex> lex_vec;
     FILE* f;
@@ -23,6 +23,7 @@ class Scanner{
     inline void gc();
     inline void clear_buffer();
     inline void addc();
+    inline void addc(char my_c);
     int look(const string buf, const string table[]);
 public:
     static const string WORD_NAMES[];
@@ -37,6 +38,12 @@ public:
 
     Scanner(const char* input_f);
     Scanner();
-    void print_vec();
+    //void add_lex(lex_t type_par, int val_par);
+    void print_vec() const;
     void start() throw(char);
 };
+
+//TODO: >= != ...
+//TODO: proper exceptions
+//TODO: check on permissible symbols
+//TODO: defines

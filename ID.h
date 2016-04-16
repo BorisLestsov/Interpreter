@@ -24,6 +24,6 @@ public:
 class ID_table_t {
     vector<ID> table;
 public:
-    int append(const string&);
+    int append(const string & new_id, lex_t type_par);
     void print_table() const;
 };

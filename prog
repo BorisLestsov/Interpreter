@@ -1,6 +1,10 @@
-program helloworld {
-int x = 1;
-string str1 = ", str2;
+program 
+{
+int x = -015;
+string str1 = "hel\"lo\t\? man\"", str2;
+/*comment *
+here */
 write(x);
+//another comment /*
 }
 @
