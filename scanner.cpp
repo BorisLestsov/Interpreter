@@ -34,6 +34,10 @@ inline void Scanner::addc(char my_c){
     buffer += my_c;
 }
 
+void Scanner::add_lex(lex_t type_par, int val_par){
+    lex_vec.push_back(Lex(type_par, val_par));
+}
+
 void Scanner::print_vec() const{
     vector<Lex>::const_iterator ptr;
 
@@ -104,25 +108,25 @@ void Scanner::start() throw(char){
                     clear_buffer();
                     addc();
                 } else if (c == ',') {
-                    lex_vec.push_back(Lex(LEX_COMMA, LEX_COMMA));
+                    add_lex(LEX_COMMA, LEX_COMMA);
                 } else if (c == '(') {
-                    lex_vec.push_back(Lex(LEX_LPAREN, LEX_LPAREN));
+                    add_lex(LEX_LPAREN, LEX_LPAREN);
                 } else if (c == ')') {
-                    lex_vec.push_back(Lex(LEX_RPAREN, LEX_RPAREN));
+                    add_lex(LEX_RPAREN, LEX_RPAREN);
                 } else if (c == ':') {
-                    lex_vec.push_back(Lex(LEX_COLON, LEX_COLON));
+                    add_lex(LEX_COLON, LEX_COLON);
                 } else if (c == ';') {
-                    lex_vec.push_back(Lex(LEX_SEMICOLON, LEX_SEMICOLON));
+                    add_lex(LEX_SEMICOLON, LEX_SEMICOLON);
                 } else if (c == '{') {
-                    lex_vec.push_back(Lex(LEX_BEGIN, LEX_BEGIN));
+                    add_lex(LEX_BEGIN, LEX_BEGIN);
                 } else if (c == '}') {
-                    lex_vec.push_back(Lex(LEX_END, LEX_END));
+                    add_lex(LEX_END, LEX_END);
                 } else if (c == '<' || c == '>' || c == '=') {
                     STATE = ALE_ST;
                     clear_buffer();
                     addc();
                 } else if (c == '@') {
-                    lex_vec.push_back(Lex(LEX_FIN));
+                    add_lex(LEX_FIN);
                     return;
                 }
                 break;
@@ -134,10 +138,10 @@ void Scanner::start() throw(char){
                     STATE = H_ST;
                     ungetc(c, f);
                     if (j != 0)
-                        lex_vec.push_back(Lex(WORD_LEXEMS[j], j));
+                        add_lex(WORD_LEXEMS[j], j);
                     else {
                         j = ID_TABLE.append(buffer, LEX_ID);
-                        lex_vec.push_back(Lex(LEX_ID, j));
+                        add_lex(LEX_ID, j);
                     }
                 }
                 break;
@@ -147,7 +151,7 @@ void Scanner::start() throw(char){
                 else {
                     STATE = H_ST;
                     d = d * sign;
-                    lex_vec.push_back(Lex(LEX_NUM, d));
+                    add_lex(LEX_NUM, d);
                 }
                 break;
             case STR_ST:
@@ -160,7 +164,7 @@ void Scanner::start() throw(char){
                     }else throw c;
                 } else if(c == '\"'){
                     j = ID_TABLE.append(buffer, LEX_STRC);
-                    lex_vec.push_back(Lex(LEX_STRC, j));
+                    add_lex(LEX_STRC, j);
                     STATE = H_ST;
                 } else if(c == '@'){
                     throw c;
@@ -181,10 +185,10 @@ void Scanner::start() throw(char){
                     addc();
                     j = look(buffer, DEL_NAMES);
                     if (j == 8) throw (c);
-                    lex_vec.push_back(Lex(DEL_LEXEMS[j], j));
+                    add_lex(DEL_LEXEMS[j], j);
                 } else {
                     j = look(buffer, DEL_NAMES);
-                    lex_vec.push_back(Lex(DEL_LEXEMS[j], j));
+                    add_lex(DEL_LEXEMS[j], j);
                 }
                 STATE = H_ST;
                 break;

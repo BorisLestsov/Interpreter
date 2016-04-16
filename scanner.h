@@ -38,7 +38,7 @@ public:
 
     Scanner(const char* input_f);
     Scanner();
-    //void add_lex(lex_t type_par, int val_par);
+    inline void add_lex(lex_t type_par, int val_par = 0);
     void print_vec() const;
     void start() throw(char);
 };
