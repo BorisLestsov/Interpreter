@@ -1,16 +1,20 @@
-program 
+program
 {
-int x = -015;
-string str1 = "hel\"lo\t\? man\"", str2;
-struct s{
-	int a1; 
-}
-/*comment *
-here */
-write(x);
-//another comment /*
-if((x == -15 and not(str1 != str2)) or true){
-	x = 0;
-}
-}
-@
+ int a = 51, b = 6, c;
+ string x = "abc", y, z = "abcd";
+ c = (a + b) * 2; if (c >= 100 or x == z)
+ {
+ read (y);
+ write (y);
+ write (x + y + z, c);
+ }
+ else
+ c = a = 21;
+ while (c > 100)
+ {
+ c = c - 5;
+ write (c);
+ x = x + "step";
+ }
+ write (x);
+} @

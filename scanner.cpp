@@ -71,7 +71,7 @@ void Scanner::start() throw(exception){
     STATE = H_ST;
     do {
         gc();
-        //usleep(200000);
+        //usleep(250000);
         cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
@@ -92,8 +92,8 @@ void Scanner::start() throw(exception){
                         sign = 1;
                     else
                         sign = -1;
-                    STATE = NUMB_ST;
                     d = 0;
+                    STATE = SIGN_ST;
                 } else if (c == '/') {
                     STATE = COM_ST;
                     gc();
@@ -118,6 +118,9 @@ void Scanner::start() throw(exception){
                 } else if (c == '@') {
                     add_lex(LEX_FIN);
                     return;
+                } else if (c == '#') {
+                    clear_buffer();
+                    STATE = MACRO_ST;
                 } else {
                     clear_buffer();
                     addc();
@@ -144,8 +147,23 @@ void Scanner::start() throw(exception){
                     d = d * 10 + (c - '0');
                 else {
                     STATE = H_ST;
+                    ungetc(c, f);
                     d = d * sign;
                     add_lex(LEX_NUM, d);
+                }
+                break;
+            case SIGN_ST:
+                if(isdigit(c)){
+                    ungetc(c,f);
+                    STATE = NUMB_ST;
+                } else if(isalpha(c)){
+                    clear_buffer();
+                    addc();
+                    STATE = ID_ST;
+                } else {
+                    if(sign > 0) add_lex(LEX_PLUS, LEX_PLUS);
+                    else add_lex(LEX_MINUS, LEX_MINUS);
+                    STATE = H_ST;
                 }
                 break;
             case STR_ST:
@@ -199,10 +217,10 @@ void Scanner::start() throw(exception){
                     add_lex(LEX_NEQ, LEX_NEQ);
                 } /*else {
                     add_lex(LEX_NOT);
-                }*/ //TODO: what it should be?
+                }*/ //TODO: what should it be?
                 STATE = H_ST;
                 break;
-            case DELIM_ST:{
+            case DELIM_ST:
                 j = look(buffer, DEL_NAMES);
                 if(j != LEX_NULL){
                     add_lex(DEL_LEXEMS[j], j);
@@ -210,15 +228,30 @@ void Scanner::start() throw(exception){
                 } else {
                     addc();
                     j = look(buffer, DEL_NAMES);
-                    add_lex(DEL_LEXEMS[j], j);
+                    if(j != LEX_NULL)
+                        add_lex(DEL_LEXEMS[j], j);
+                    else throw my_except();
                 }
                 STATE = H_ST;
-            }
+                break;
+            case MACRO_ST:
+                if(isalpha(c)){
+                    addc();
+                    j = look(buffer, MACRO_NAMES);
+                    if(j != LEX_NULL) {
+                        STATE = ADD_MACRO;
+                    }
+                } else throw my_except();
+                break;
+            case ADD_MACRO:
+                if(isalpha(c)){
+                    addc();
+                } else {}
+
                 break;
         }
     } while (true);
 }
-
 
 //tables
 const string Scanner::WORD_NAMES[] = {
@@ -265,6 +298,14 @@ const string Scanner::DEL_NAMES[] = {
         "<=",
         "!=",
         ">=",
+        TBL_END
+};
+
+const string Scanner::MACRO_NAMES[] = {
+        "",
+        "define",
+        "ifdef",
+        "ifndef",
         TBL_END
 };
 
