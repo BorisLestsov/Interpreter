@@ -13,7 +13,8 @@ int main(int argc, char* argv[]){
         main_scanner.print_vec();
         main_scanner.ID_TABLE.print_table();
     }
-    catch (int){ return -1;}
-    catch (char c){cerr << "wrong symbol: " << c <<endl; return -1;}
+    catch (exception& ex){
+        cerr << ex.what() << endl;
+    }
     return 0;
 }

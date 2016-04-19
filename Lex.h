@@ -9,7 +9,7 @@
 
 #include <string>
 #include <iomanip>
-#include <ostream>
+#include <iostream>
 #include "lex_t.h"
 #include <map>
 

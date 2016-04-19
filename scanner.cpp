@@ -64,15 +64,14 @@ int Scanner::look(const string buf, const string table[]){
     return 0;
 }
 
-void Scanner::start() throw(char){
+void Scanner::start() throw(exception){
     int d, j, sign = 1;
-    string s;
     char com_type;
 
     STATE = H_ST;
     do {
         gc();
-        //usleep(250000);
+        //usleep(200000);
         cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
@@ -102,32 +101,27 @@ void Scanner::start() throw(char){
                         com_type = '/';
                     } else if(c == '*') {
                         com_type = '*';
-                    } else throw c;
+                    } else throw my_except();
                 } else if (c == '!') {
                     STATE = NEQ_ST;
                     clear_buffer();
                     addc();
-                } else if (c == ',') {
-                    add_lex(LEX_COMMA, LEX_COMMA);
-                } else if (c == '(') {
-                    add_lex(LEX_LPAREN, LEX_LPAREN);
-                } else if (c == ')') {
-                    add_lex(LEX_RPAREN, LEX_RPAREN);
-                } else if (c == ':') {
-                    add_lex(LEX_COLON, LEX_COLON);
-                } else if (c == ';') {
-                    add_lex(LEX_SEMICOLON, LEX_SEMICOLON);
-                } else if (c == '{') {
-                    add_lex(LEX_BEGIN, LEX_BEGIN);
-                } else if (c == '}') {
-                    add_lex(LEX_END, LEX_END);
-                } else if (c == '<' || c == '>' || c == '=') {
+                } else if (c == '<' || c == '>') {
                     STATE = ALE_ST;
                     clear_buffer();
                     addc();
+                } else if (c == '=') {
+                    STATE = EQ_ST;
+                    clear_buffer();
+                    addc();
+                    break;
                 } else if (c == '@') {
                     add_lex(LEX_FIN);
                     return;
+                } else {
+                    clear_buffer();
+                    addc();
+                    STATE = DELIM_ST;
                 }
                 break;
             case ID_ST:
@@ -161,13 +155,13 @@ void Scanner::start() throw(char){
                         if (c == 'n') addc('\n');
                         else if(c == 't') addc('\t');
                         else addc();
-                    }else throw c;
+                    }else throw my_except();
                 } else if(c == '\"'){
                     j = ID_TABLE.append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
                 } else if(c == '@'){
-                    throw c;
+                    throw my_except();
                 } else addc();
                 break;
             case COM_ST:
@@ -181,16 +175,45 @@ void Scanner::start() throw(char){
                 }
                 break;
             case ALE_ST:
-                if (c == '=') {
+                if(c == '=') {
                     addc();
                     j = look(buffer, DEL_NAMES);
-                    if (j == 8) throw (c);
                     add_lex(DEL_LEXEMS[j], j);
+                    STATE = H_ST;
                 } else {
+                    j = look(buffer, DEL_NAMES);
+                    add_lex(DEL_LEXEMS[j], j);
+                    STATE = H_ST;
+                }
+                break;
+            case EQ_ST:
+                if(c == '=') {
+                    add_lex(LEX_EQ, LEX_EQ);
+                } else {
+                    add_lex(LEX_ASSIGN, LEX_ASSIGN);
+                }
+                STATE = H_ST;
+                break;
+            case NEQ_ST:
+                if(c == '='){
+                    add_lex(LEX_NEQ, LEX_NEQ);
+                } /*else {
+                    add_lex(LEX_NOT);
+                }*/ //TODO: what it should be?
+                STATE = H_ST;
+                break;
+            case DELIM_ST:{
+                j = look(buffer, DEL_NAMES);
+                if(j != LEX_NULL){
+                    add_lex(DEL_LEXEMS[j], j);
+                    ungetc(c, f);
+                } else {
+                    addc();
                     j = look(buffer, DEL_NAMES);
                     add_lex(DEL_LEXEMS[j], j);
                 }
                 STATE = H_ST;
+            }
                 break;
         }
     } while (true);
@@ -201,11 +224,9 @@ void Scanner::start() throw(char){
 const string Scanner::WORD_NAMES[] = {
         "",
         "and",
-        "{",
         "bool",
         "do",
         "else",
-        "}",
         "if",
         "false",
         "int",
@@ -219,19 +240,22 @@ const string Scanner::WORD_NAMES[] = {
         "var",
         "while",
         "write",
+        "struct",
         TBL_END
 };
 
 const string Scanner::DEL_NAMES[] = {
         "",
+        "{",
+        "}",
         "@",
         ";",
         ",",
         ":",
-        "=",
+        "==",
         "(",
         ")",
-        "==",
+        "=",
         "<",
         ">",
         "+",
@@ -247,11 +271,9 @@ const string Scanner::DEL_NAMES[] = {
 const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_NULL,
         LEX_AND,
-        LEX_BEGIN,
         LEX_BOOL,
         LEX_DO,
         LEX_ELSE,
-        LEX_END,
         LEX_IF,
         LEX_FALSE,
         LEX_INT,
@@ -265,11 +287,14 @@ const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_VAR,
         LEX_WHILE,
         LEX_WRITE,
+        LEX_STRUCT,
         LEX_NULL
 };
 
 const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_NULL,
+        LEX_BEGIN,
+        LEX_END,
         LEX_FIN,
         LEX_SEMICOLON,
         LEX_COMMA,
@@ -331,6 +356,7 @@ string debug[] = {
         "LEX_NEQ",
         "LEX_GEQ",
         "LEX_STRC",
+        "LEX_STRUCT",
         "LEX_NUM",
         "LEX_ID",
 };

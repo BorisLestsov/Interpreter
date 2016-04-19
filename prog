@@ -2,9 +2,15 @@ program
 {
 int x = -015;
 string str1 = "hel\"lo\t\? man\"", str2;
+struct s{
+	int a1; 
+}
 /*comment *
 here */
 write(x);
 //another comment /*
+if((x == -15 and not(str1 != str2)) or true){
+	x = 0;
+}
 }
 @

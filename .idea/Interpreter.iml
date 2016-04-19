@@ -7,8 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/ID.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Lex.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Lex.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Preprocessor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Preprocessor.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/interpreter_app.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lex_t.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/my_except.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/my_except.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/parser.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/parser.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/scanner.cpp" isTestSource="false" />

@@ -43,6 +43,7 @@ enum lex_t {
         LEX_NEQ,
         LEX_GEQ,
         LEX_STRC,
+        LEX_STRUCT,
         LEX_NUM,
         LEX_ID
 };

@@ -7,11 +7,12 @@
 #include "Lex.h"
 #include <vector>
 #include "ID.h"
+#include "my_except.h"
 
 using namespace std;
 
 class Scanner{
-    enum state_t {H_ST, ID_ST, NUMB_ST, STR_ST, COM_ST, ALE_ST, DELIM_ST, NEQ_ST};
+    enum state_t {H_ST, ID_ST, NUMB_ST, STR_ST, COM_ST, ALE_ST, DELIM_ST, EQ_ST, NEQ_ST};
     state_t STATE;
     vector<Lex> lex_vec;
     FILE* f;
@@ -40,10 +41,9 @@ public:
     Scanner();
     inline void add_lex(lex_t type_par, int val_par = 0);
     void print_vec() const;
-    void start() throw(char);
+    void start() throw(exception);
 };
 
-//TODO: >= != ...
 //TODO: proper exceptions
 //TODO: check on permissible symbols
 //TODO: defines
