@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[]){
     try {
-        if(argc < 2) throw -1;
+        if(argc < 2) throw Exception("Interpreter error: no file");
         Scanner main_scanner(argv[1]);
         main_scanner.construct_lex_map();
 
@@ -14,7 +14,7 @@ int main(int argc, char* argv[]){
         main_scanner.ID_TABLE.print_table();
     }
     catch (exception& ex){
-        cerr << ex.what() << endl;
+        ex.what();
     }
     return 0;
 }

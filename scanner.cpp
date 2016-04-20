@@ -17,7 +17,7 @@ Scanner::Scanner(): lex_vec(0, Lex()) {
 
 Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
     f = fopen(input_f, "r");
-    if(f == NULL) throw -1;
+    if(f == NULL) throw Exception("Scanner error: could not open file");
     clear_buffer();
     STATE = H_ST;
 }
@@ -101,7 +101,7 @@ void Scanner::start() throw(exception){
                         com_type = '/';
                     } else if(c == '*') {
                         com_type = '*';
-                    } else throw my_except();
+                    } else throw Exception("Scanner error: expected \'/\' or\'*\'");
                 } else if (c == '!') {
                     STATE = NEQ_ST;
                     clear_buffer();
@@ -173,13 +173,13 @@ void Scanner::start() throw(exception){
                         if (c == 'n') addc('\n');
                         else if(c == 't') addc('\t');
                         else addc();
-                    }else throw my_except();
+                    }else throw Exception("Scanner error: unknown literal: ", c);
                 } else if(c == '\"'){
                     j = ID_TABLE.append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
                 } else if(c == '@'){
-                    throw my_except();
+                    throw Exception("Scanner error: unknown literal: ", c );
                 } else addc();
                 break;
             case COM_ST:
@@ -230,7 +230,7 @@ void Scanner::start() throw(exception){
                     j = look(buffer, DEL_NAMES);
                     if(j != LEX_NULL)
                         add_lex(DEL_LEXEMS[j], j);
-                    else throw my_except();
+                    else throw Exception("Scanner error: unknown word: ", buffer);
                 }
                 STATE = H_ST;
                 break;
@@ -241,7 +241,7 @@ void Scanner::start() throw(exception){
                     if(j != LEX_NULL) {
                         STATE = ADD_MACRO;
                     }
-                } else throw my_except();
+                } else throw Exception("Scanner error: MACROS UNDER CONSTRUCTION");
                 break;
             case ADD_MACRO:
                 if(isalpha(c)){
