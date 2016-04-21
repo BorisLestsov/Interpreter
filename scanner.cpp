@@ -5,6 +5,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "scanner.h"
+#include <stack>
 
 using namespace std;
 
@@ -20,6 +21,10 @@ Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
     if(f == NULL) throw Exception("Scanner error: could not open file");
     clear_buffer();
     STATE = H_ST;
+}
+
+Scanner::~Scanner(){
+    fclose(f);
 }
 
 inline void Scanner::gc(){
@@ -71,6 +76,7 @@ void Scanner::start() throw(exception){
     int M_STATE = MACRO_NULL;
     const ID* ID_ptr;
     enum m_skip_t {SKIP_ELSE, SKIP_IF} skip;
+    stack<m_skip_t> skip_stack;
 
     STATE = H_ST;
     do {
@@ -123,8 +129,10 @@ void Scanner::start() throw(exception){
                     clear_buffer();
                     addc();
                     break;
-                } else if (c == '@') {
-                    add_lex(LEX_FIN);
+                } else if (feof(f)) {
+                    if(skip_stack.empty())
+                        add_lex(LEX_FIN);   //Do I need it?
+                    else throw Exception("Scanner error: expected endif macro", c);
                     return;
                 } else if (c == '#') {
                     clear_buffer();
@@ -196,8 +204,6 @@ void Scanner::start() throw(exception){
                     j = ID_TABLE.append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
-                } else if(c == '@'){
-                    throw Exception("Scanner error: unknown literal: ", c );
                 } else addc();
                 break;
             case COM_ST:
@@ -295,10 +301,12 @@ void Scanner::start() throw(exception){
                                 if(c != '\n') throw Exception("Scanner error: ifdef expected \\n");
                                 if(ID_TABLE.find(buffer) != NULL){
                                     STATE = H_ST;
-                                    skip = SKIP_ELSE;
+                                    //skip = SKIP_ELSE;
+                                    skip_stack.push(SKIP_ELSE);
                                 } else {
                                     M_STATE = MACRO_SKIP;
-                                    skip = SKIP_IF;
+                                    //skip = SKIP_IF;
+                                    skip_stack.push(SKIP_IF);
                                 }
                                 started = false;
                             }
@@ -323,10 +331,12 @@ void Scanner::start() throw(exception){
                                 if(c != '\n') throw Exception("Scanner error: ifndef expected \\n");
                                 if(ID_TABLE.find(buffer) == NULL){
                                     STATE = H_ST;
-                                    skip = SKIP_ELSE;
+                                    //skip = SKIP_ELSE;
+                                    skip_stack.push(SKIP_ELSE);
                                 } else {
                                     M_STATE = MACRO_SKIP;
-                                    skip = SKIP_IF;
+                                    //skip = SKIP_IF;
+                                    skip_stack.push(SKIP_IF);
                                 }
                                 started = false;
                             }
@@ -338,13 +348,14 @@ void Scanner::start() throw(exception){
                         }
                         break;
                     case MACRO_ELSE:
-                        if(skip == SKIP_ELSE){
+                        if(skip_stack.top() == SKIP_ELSE){
                             M_STATE = MACRO_SKIP;
                         } else {
                             STATE = H_ST;
                         }
                         break;
                     case MACRO_ENDIF:
+                        skip_stack.pop();
                         STATE = H_ST;
                         M_STATE = MACRO_NULL;
                         break;
@@ -417,7 +428,6 @@ const string Scanner::DEL_NAMES[] = {
         "",
         "{",
         "}",
-        "@",
         ";",
         ",",
         ":",
@@ -479,7 +489,6 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_NULL,
         LEX_BEGIN,
         LEX_END,
-        LEX_FIN,
         LEX_SEMICOLON,
         LEX_COMMA,
         LEX_COLON,
@@ -522,7 +531,6 @@ string debug[] = {
         "LEX_VAR",
         "LEX_WHILE",
         "LEX_WRITE",
-        "LEX_FIN",
         "LEX_SEMICOLON",
         "LEX_COMMA",
         "LEX_COLON",
@@ -545,6 +553,7 @@ string debug[] = {
         "LEX_BREAK",
         "LEX_CONTINUE",
         "LEX_MACRO_NAME",
+        "LEX_FIN",
         "LEX_NUM",
         "LEX_ID",
 };

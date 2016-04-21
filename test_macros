@@ -1,0 +1,15 @@
+/*
+#define N 5
+
+#ifdef N
+program
+#undef N
+#ifndef N
+}
+#else
+*
+#endif
+#else
+{
+#endif
+*/

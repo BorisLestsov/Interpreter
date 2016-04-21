@@ -25,7 +25,6 @@ enum lex_t {
         LEX_VAR,
         LEX_WHILE,
         LEX_WRITE,
-        LEX_FIN,
         LEX_SEMICOLON,
         LEX_COMMA,
         LEX_COLON,
@@ -48,6 +47,7 @@ enum lex_t {
         LEX_BREAK,
         LEX_CONTINUE,
         LEX_MACRO_NAME,
+        LEX_FIN,
         LEX_NUM,
         LEX_ID
 };

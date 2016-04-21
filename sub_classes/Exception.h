@@ -13,9 +13,9 @@ class Exception: public exception {
     char* err_msg;
     string err_word;
 public:
-    Exception(const char* err_msg_par, string err_word_par = string());
-    Exception(const char* err_msg_par, const char c_par);
+    Exception(const char* err_msg_par, const string& err_word_par);
+    Exception(const char* err_msg_par, const char c_par = '\0');
     ~Exception();
 
-    const char* what() const throw();
+    const char* what() const throw() override;
 };

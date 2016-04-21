@@ -14,7 +14,7 @@ int main(int argc, char* argv[]){
         main_scanner.ID_TABLE.print_table();
     }
     catch (exception& ex){
-        ex.what();
+        cout << ex.what() << endl;
     }
     return 0;
 }

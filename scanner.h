@@ -44,6 +44,7 @@ public:
 
     Scanner(const char* input_f);
     Scanner();
+    ~Scanner();
     inline void add_lex(lex_t type_par, int val_par = 0);
     void print_vec() const;
     void start() throw(exception);
@@ -51,5 +52,5 @@ public:
 
 //TODO: proper exceptions - DONE
 //TODO: check on permissible symbols - DONE
-//TODO: defines - SYKA BLYAT
+//TODO: defines - DONE
 //TODO: why not to replace ID_ST with GET_ID_ST and PREV_STATE?
