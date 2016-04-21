@@ -67,10 +67,10 @@ int Scanner::look(const string buf, const string table[]){
 void Scanner::start() throw(exception){
     int d, j, sign = 1;
     char com_type;
-    bool started;
+    bool started = false;
     int M_STATE = MACRO_NULL;
-    state_t PREV_STATE = H_ST;
     const ID* ID_ptr;
+    enum m_skip_t {SKIP_ELSE, SKIP_IF} skip;
 
     STATE = H_ST;
     do {
@@ -288,12 +288,65 @@ void Scanner::start() throw(exception){
                         }
                         break;
                     case MACRO_IFDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: ifdef expected \\n");
+                                if(ID_TABLE.find(buffer) != NULL){
+                                    STATE = H_ST;
+                                    skip = SKIP_ELSE;
+                                } else {
+                                    M_STATE = MACRO_SKIP;
+                                    skip = SKIP_IF;
+                                }
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case MACRO_SKIP:
+                        if(c == '#'){
+                            clear_buffer();
+                            STATE = MACRO_ST;
+                        }
                         break;
                     case MACRO_IFNDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: ifndef expected \\n");
+                                if(ID_TABLE.find(buffer) == NULL){
+                                    STATE = H_ST;
+                                    skip = SKIP_ELSE;
+                                } else {
+                                    M_STATE = MACRO_SKIP;
+                                    skip = SKIP_IF;
+                                }
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
                         break;
                     case MACRO_ELSE:
+                        if(skip == SKIP_ELSE){
+                            M_STATE = MACRO_SKIP;
+                        } else {
+                            STATE = H_ST;
+                        }
                         break;
                     case MACRO_ENDIF:
+                        STATE = H_ST;
+                        M_STATE = MACRO_NULL;
                         break;
                     case MACRO_UNDEF:
                         if(started){
