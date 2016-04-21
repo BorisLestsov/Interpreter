@@ -3,6 +3,7 @@
 //
 
 #include "ID.h"
+#include "Exception.h"
 
 ID::ID(lex_t lex_par, const string& name_par, int val_par): type(lex_par), name(name_par), value(val_par){}
 ID::ID(lex_t lex_par, const char* name_par, int val_par): type(lex_par), name(name_par), value(val_par){};
@@ -39,16 +40,30 @@ int ID_table_t::append(const string &new_id, lex_t type_par, int value) {
     return i;
 }
 
-bool ID_table_t::ispresent(const string id_name) const{
+const ID* ID_table_t::find(const string id_name) const{
     vector<ID>::const_iterator ptr = table.cbegin();
     vector<ID>::const_iterator end  = table.cend();
 
     while(ptr != end){
         if(id_name == ptr->get_name())
-            return true;
+            return &(*ptr);
         ++ptr;
     }
-    return false;
+    return NULL;
+}
+
+void ID_table_t::erase(const string& id_name){
+    vector<ID>::iterator ptr = table.begin();
+    vector<ID>::iterator end  = table.end();
+
+    while(ptr != end){
+        if(id_name == ptr->get_name()){
+            table.erase(ptr);
+            return;
+        }
+        ++ptr;
+    }
+    throw Exception("Scanner error: identifier not found: ", id_name);
 }
 
 void ID_table_t::print_table() const{

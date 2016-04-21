@@ -51,3 +51,4 @@ public:
 //TODO: proper exceptions - DONE
 //TODO: check on permissible symbols - DONE
 //TODO: defines - SYKA BLYAT
+//TODO: why not to replace ID_ST with GET_ID_ST and PREV_STATE?

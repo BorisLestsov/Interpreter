@@ -68,7 +68,9 @@ void Scanner::start() throw(exception){
     int d, j, sign = 1;
     char com_type;
     bool started;
-    int m_state = MACRO_NULL;
+    int M_STATE = MACRO_NULL;
+    state_t PREV_STATE = H_ST;
+    const ID* ID_ptr;
 
     STATE = H_ST;
     do {
@@ -140,11 +142,15 @@ void Scanner::start() throw(exception){
                     j = look(buffer, WORD_NAMES);
                     STATE = H_ST;
                     ungetc(c, f);
-                    if (j != 0)
+                    if (j != 0) {
                         add_lex(WORD_LEXEMS[j], j);
-                    else {
+                    } else {
                         j = ID_TABLE.append(buffer, LEX_ID);
-                        add_lex(LEX_ID, j);
+                        ID_ptr = ID_TABLE.find(buffer);
+                        if(ID_ptr->get_type() == LEX_MACRO_NAME)
+                            add_lex(LEX_NUM, ID_ptr->get_value());
+                        else
+                            add_lex(LEX_ID, j);
                     }
                 }
                 break;
@@ -153,14 +159,14 @@ void Scanner::start() throw(exception){
                     d = d * 10 + (c - '0');
                 else {
                     d = d * sign;
-                    if(m_state != MACRO_DEFINE){
+                    if(M_STATE != MACRO_DEFINE){
                         add_lex(LEX_NUM, d);
                         STATE = H_ST;
                         ungetc(c, f);
-                    }
-                    else {
+                    } else {
+                        ungetc(c, f);
                         STATE = ADD_MACRO;
-                        m_state = DEFINE_FINISHED;
+                        M_STATE = DEFINE_FINISHED;
                     }
                 }
                 break;
@@ -249,21 +255,21 @@ void Scanner::start() throw(exception){
             case MACRO_ST:
                 if(isalpha(c)){
                     addc();
-                    m_state = look(buffer, MACRO_NAMES);
-                    if(m_state != MACRO_NULL && m_state != DEFINE_FINISHED) {
+                    M_STATE = look(buffer, MACRO_NAMES);
+                    if(M_STATE != MACRO_NULL && M_STATE != DEFINE_FINISHED) {
                         clear_buffer();
                         STATE = ADD_MACRO;
                     }
                 } else throw Exception("Scanner error: Unknown macro: ", buffer);
                 break;
             case ADD_MACRO:
-                switch (m_state) {
+                switch (M_STATE) {
                     case MACRO_DEFINE:
                         if(started){
                             if(isalpha(c) || isdigit(c))
                                 addc();
                             else {
-                                if(ID_TABLE.ispresent(buffer))
+                                if(ID_TABLE.find(buffer) != NULL)
                                     throw Exception("Scanner error: redefines unavaible", c);
                                 gc();
                                 sign = 1;
@@ -272,6 +278,7 @@ void Scanner::start() throw(exception){
                                 if(!isdigit(c)) throw Exception("Scanner error: expected number");
                                 else d = c - '0';
                                 STATE = NUMB_ST;
+                                started = false;
                             }
                         } else {
                             if(isalpha(c)) {
@@ -286,13 +293,31 @@ void Scanner::start() throw(exception){
                         break;
                     case MACRO_ELSE:
                         break;
-                    case MACRO_UNDEF:
-                        break;
                     case MACRO_ENDIF:
+                        break;
+                    case MACRO_UNDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: undef expected \\n");
+                                if(ID_TABLE.find(buffer) == NULL)
+                                    throw Exception("Scanner error: identifier not found: ", buffer);
+                                ID_TABLE.erase(buffer);
+                                STATE = H_ST;
+                                M_STATE = MACRO_NULL;
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
                         break;
                     case DEFINE_FINISHED:
                         if(c != '\n') throw Exception("Scanner error: define expected \\n");
-                        m_state = MACRO_NULL;
+                        M_STATE = MACRO_NULL;
                         STATE = H_ST;
                         ID_TABLE.append(buffer, LEX_MACRO_NAME, d);
                         break;
