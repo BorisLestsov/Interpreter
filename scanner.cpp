@@ -5,6 +5,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "scanner.h"
+#include <stack>
 
 using namespace std;
 
@@ -17,9 +18,13 @@ Scanner::Scanner(): lex_vec(0, Lex()) {
 
 Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
     f = fopen(input_f, "r");
-    if(f == NULL) throw -1;
+    if(f == NULL) throw Exception("Scanner error: could not open file");
     clear_buffer();
     STATE = H_ST;
+}
+
+Scanner::~Scanner(){
+    fclose(f);
 }
 
 inline void Scanner::gc(){
@@ -32,6 +37,10 @@ inline void Scanner::addc(){
 
 inline void Scanner::addc(char my_c){
     buffer += my_c;
+}
+
+void Scanner::add_lex(lex_t type_par, int val_par){
+    lex_vec.push_back(Lex(type_par, val_par));
 }
 
 void Scanner::print_vec() const{
@@ -60,10 +69,14 @@ int Scanner::look(const string buf, const string table[]){
     return 0;
 }
 
-void Scanner::start() throw(char){
+void Scanner::start() throw(exception){
     int d, j, sign = 1;
-    string s;
     char com_type;
+    bool started = false;
+    int M_STATE = MACRO_NULL;
+    const ID* ID_ptr;
+    enum m_skip_t {SKIP_ELSE, SKIP_IF} skip;
+    stack<m_skip_t> skip_stack;
 
     STATE = H_ST;
     do {
@@ -89,41 +102,45 @@ void Scanner::start() throw(char){
                         sign = 1;
                     else
                         sign = -1;
-                    STATE = NUMB_ST;
                     d = 0;
+                    STATE = SIGN_ST;
                 } else if (c == '/') {
-                    STATE = COM_ST;
                     gc();
                     if(c == '/') {
+                        STATE = COM_ST;
                         com_type = '/';
                     } else if(c == '*') {
+                        STATE = COM_ST;
                         com_type = '*';
-                    } else throw c;
+                    } else {
+                        add_lex(LEX_SLASH, LEX_SLASH);
+                        STATE = H_ST;
+                    }
                 } else if (c == '!') {
                     STATE = NEQ_ST;
                     clear_buffer();
                     addc();
-                } else if (c == ',') {
-                    lex_vec.push_back(Lex(LEX_COMMA, LEX_COMMA));
-                } else if (c == '(') {
-                    lex_vec.push_back(Lex(LEX_LPAREN, LEX_LPAREN));
-                } else if (c == ')') {
-                    lex_vec.push_back(Lex(LEX_RPAREN, LEX_RPAREN));
-                } else if (c == ':') {
-                    lex_vec.push_back(Lex(LEX_COLON, LEX_COLON));
-                } else if (c == ';') {
-                    lex_vec.push_back(Lex(LEX_SEMICOLON, LEX_SEMICOLON));
-                } else if (c == '{') {
-                    lex_vec.push_back(Lex(LEX_BEGIN, LEX_BEGIN));
-                } else if (c == '}') {
-                    lex_vec.push_back(Lex(LEX_END, LEX_END));
-                } else if (c == '<' || c == '>' || c == '=') {
+                } else if (c == '<' || c == '>') {
                     STATE = ALE_ST;
                     clear_buffer();
                     addc();
-                } else if (c == '@') {
-                    lex_vec.push_back(Lex(LEX_FIN));
+                } else if (c == '=') {
+                    STATE = EQ_ST;
+                    clear_buffer();
+                    addc();
+                    break;
+                } else if (feof(f)) {
+                    if(skip_stack.empty())
+                        add_lex(LEX_FIN);   //Do I need it?
+                    else throw Exception("Scanner error: expected endif macro", c);
                     return;
+                } else if (c == '#') {
+                    clear_buffer();
+                    STATE = MACRO_ST;
+                } else {
+                    clear_buffer();
+                    addc();
+                    STATE = DELIM_ST;
                 }
                 break;
             case ID_ST:
@@ -133,11 +150,15 @@ void Scanner::start() throw(char){
                     j = look(buffer, WORD_NAMES);
                     STATE = H_ST;
                     ungetc(c, f);
-                    if (j != 0)
-                        lex_vec.push_back(Lex(WORD_LEXEMS[j], j));
-                    else {
+                    if (j != 0) {
+                        add_lex(WORD_LEXEMS[j], j);
+                    } else {
                         j = ID_TABLE.append(buffer, LEX_ID);
-                        lex_vec.push_back(Lex(LEX_ID, j));
+                        ID_ptr = ID_TABLE.find(buffer);
+                        if(ID_ptr->get_type() == LEX_MACRO_NAME)
+                            add_lex(LEX_NUM, ID_ptr->get_value());
+                        else
+                            add_lex(LEX_ID, j);
                     }
                 }
                 break;
@@ -145,9 +166,30 @@ void Scanner::start() throw(char){
                 if (isdigit(c))
                     d = d * 10 + (c - '0');
                 else {
-                    STATE = H_ST;
                     d = d * sign;
-                    lex_vec.push_back(Lex(LEX_NUM, d));
+                    if(M_STATE != MACRO_DEFINE){
+                        add_lex(LEX_NUM, d);
+                        STATE = H_ST;
+                        ungetc(c, f);
+                    } else {
+                        ungetc(c, f);
+                        STATE = ADD_MACRO;
+                        M_STATE = DEFINE_FINISHED;
+                    }
+                }
+                break;
+            case SIGN_ST:
+                if(isdigit(c)){
+                    ungetc(c,f);
+                    STATE = NUMB_ST;
+                } else if(isalpha(c)){
+                    clear_buffer();
+                    addc();
+                    STATE = ID_ST;
+                } else {
+                    if(sign > 0) add_lex(LEX_PLUS, LEX_PLUS);
+                    else add_lex(LEX_MINUS, LEX_MINUS);
+                    STATE = H_ST;
                 }
                 break;
             case STR_ST:
@@ -157,13 +199,11 @@ void Scanner::start() throw(char){
                         if (c == 'n') addc('\n');
                         else if(c == 't') addc('\t');
                         else addc();
-                    }else throw c;
+                    }else throw Exception("Scanner error: unknown literal: ", c);
                 } else if(c == '\"'){
                     j = ID_TABLE.append(buffer, LEX_STRC);
-                    lex_vec.push_back(Lex(LEX_STRC, j));
+                    add_lex(LEX_STRC, j);
                     STATE = H_ST;
-                } else if(c == '@'){
-                    throw c;
                 } else addc();
                 break;
             case COM_ST:
@@ -177,31 +217,193 @@ void Scanner::start() throw(char){
                 }
                 break;
             case ALE_ST:
-                if (c == '=') {
+                if(c == '=') {
                     addc();
                     j = look(buffer, DEL_NAMES);
-                    if (j == 8) throw (c);
-                    lex_vec.push_back(Lex(DEL_LEXEMS[j], j));
+                    add_lex(DEL_LEXEMS[j], j);
+                    STATE = H_ST;
                 } else {
                     j = look(buffer, DEL_NAMES);
-                    lex_vec.push_back(Lex(DEL_LEXEMS[j], j));
+                    add_lex(DEL_LEXEMS[j], j);
+                    STATE = H_ST;
+                }
+                break;
+            case EQ_ST:
+                if(c == '=') {
+                    add_lex(LEX_EQ, LEX_EQ);
+                } else {
+                    add_lex(LEX_ASSIGN, LEX_ASSIGN);
                 }
                 STATE = H_ST;
+                break;
+            case NEQ_ST:
+                if(c == '='){
+                    add_lex(LEX_NEQ, LEX_NEQ);
+                } /*else {
+                    add_lex(LEX_NOT);
+                }*/ //TODO: what should it be?
+                STATE = H_ST;
+                break;
+            case DELIM_ST:
+                j = look(buffer, DEL_NAMES);
+                if(j != LEX_NULL){
+                    add_lex(DEL_LEXEMS[j], j);
+                    ungetc(c, f);
+                } else {
+                    addc();
+                    j = look(buffer, DEL_NAMES);
+                    if(j != LEX_NULL)
+                        add_lex(DEL_LEXEMS[j], j);
+                    else throw Exception("Scanner error: unknown word: ", buffer);
+                }
+                STATE = H_ST;
+                break;
+            case MACRO_ST:
+                if(isalpha(c)){
+                    addc();
+                    M_STATE = look(buffer, MACRO_NAMES);
+                    if(M_STATE != MACRO_NULL && M_STATE != DEFINE_FINISHED) {
+                        clear_buffer();
+                        STATE = ADD_MACRO;
+                    }
+                } else throw Exception("Scanner error: Unknown macro: ", buffer);
+                break;
+            case ADD_MACRO:
+                switch (M_STATE) {
+                    case MACRO_DEFINE:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(ID_TABLE.find(buffer) != NULL)
+                                    throw Exception("Scanner error: redefines unavaible", c);
+                                gc();
+                                sign = 1;
+                                if(c == '-'){ sign = -1; gc();}
+                                if(c == '+') gc();
+                                if(!isdigit(c)) throw Exception("Scanner error: expected number");
+                                else d = c - '0';
+                                STATE = NUMB_ST;
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case MACRO_IFDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: ifdef expected \\n");
+                                if(ID_TABLE.find(buffer) != NULL){
+                                    STATE = H_ST;
+                                    //skip = SKIP_ELSE;
+                                    skip_stack.push(SKIP_ELSE);
+                                } else {
+                                    M_STATE = MACRO_SKIP;
+                                    //skip = SKIP_IF;
+                                    skip_stack.push(SKIP_IF);
+                                }
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case MACRO_SKIP:
+                        if(c == '#'){
+                            clear_buffer();
+                            STATE = MACRO_ST;
+                        }
+                        break;
+                    case MACRO_IFNDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: ifndef expected \\n");
+                                if(ID_TABLE.find(buffer) == NULL){
+                                    STATE = H_ST;
+                                    //skip = SKIP_ELSE;
+                                    skip_stack.push(SKIP_ELSE);
+                                } else {
+                                    M_STATE = MACRO_SKIP;
+                                    //skip = SKIP_IF;
+                                    skip_stack.push(SKIP_IF);
+                                }
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case MACRO_ELSE:
+                        if(skip_stack.top() == SKIP_ELSE){
+                            M_STATE = MACRO_SKIP;
+                        } else {
+                            STATE = H_ST;
+                        }
+                        break;
+                    case MACRO_ENDIF:
+                        skip_stack.pop();
+                        STATE = H_ST;
+                        M_STATE = MACRO_NULL;
+                        break;
+                    case MACRO_UNDEF:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(c != '\n') throw Exception("Scanner error: undef expected \\n");
+                                if(ID_TABLE.find(buffer) == NULL)
+                                    throw Exception("Scanner error: identifier not found: ", buffer);
+                                ID_TABLE.erase(buffer);
+                                STATE = H_ST;
+                                M_STATE = MACRO_NULL;
+                                started = false;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case DEFINE_FINISHED:
+                        if(c != '\n') throw Exception("Scanner error: define expected \\n");
+                        M_STATE = MACRO_NULL;
+                        STATE = H_ST;
+                        ID_TABLE.append(buffer, LEX_MACRO_NAME, d);
+                        break;
+                }
+                /*
+                if(isalpha(c)){
+                    addc();
+                } else if(c == '\n') {
+
+                } else throw Exception("Scanner error: unexpected symbol: ", c);*/
                 break;
         }
     } while (true);
 }
 
-
 //tables
 const string Scanner::WORD_NAMES[] = {
         "",
         "and",
-        "{",
         "bool",
         "do",
         "else",
-        "}",
         "if",
         "false",
         "int",
@@ -215,19 +417,24 @@ const string Scanner::WORD_NAMES[] = {
         "var",
         "while",
         "write",
+        "struct",
+        "goto",
+        "break",
+        "continue",
         TBL_END
 };
 
 const string Scanner::DEL_NAMES[] = {
         "",
-        "@",
+        "{",
+        "}",
         ";",
         ",",
         ":",
-        "=",
+        "==",
         "(",
         ")",
-        "==",
+        "=",
         "<",
         ">",
         "+",
@@ -240,14 +447,23 @@ const string Scanner::DEL_NAMES[] = {
         TBL_END
 };
 
+const string Scanner::MACRO_NAMES[] = {
+        "",
+        "define",
+        "ifdef",
+        "ifndef",
+        "else",
+        "endif",
+        "undef",
+        TBL_END
+};
+
 const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_NULL,
         LEX_AND,
-        LEX_BEGIN,
         LEX_BOOL,
         LEX_DO,
         LEX_ELSE,
-        LEX_END,
         LEX_IF,
         LEX_FALSE,
         LEX_INT,
@@ -261,12 +477,18 @@ const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_VAR,
         LEX_WHILE,
         LEX_WRITE,
+        LEX_STRUCT,
+        LEX_GOTO,
+        LEX_BREAK,
+        LEX_CONTINUE,
+        LEX_MACRO_NAME,
         LEX_NULL
 };
 
 const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_NULL,
-        LEX_FIN,
+        LEX_BEGIN,
+        LEX_END,
         LEX_SEMICOLON,
         LEX_COMMA,
         LEX_COLON,
@@ -309,7 +531,6 @@ string debug[] = {
         "LEX_VAR",
         "LEX_WHILE",
         "LEX_WRITE",
-        "LEX_FIN",
         "LEX_SEMICOLON",
         "LEX_COMMA",
         "LEX_COLON",
@@ -327,6 +548,12 @@ string debug[] = {
         "LEX_NEQ",
         "LEX_GEQ",
         "LEX_STRC",
+        "LEX_STRUCT",
+        "LEX_GOTO",
+        "LEX_BREAK",
+        "LEX_CONTINUE",
+        "LEX_MACRO_NAME",
+        "LEX_FIN",
         "LEX_NUM",
         "LEX_ID",
 };

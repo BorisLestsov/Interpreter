@@ -1,10 +1,28 @@
-program 
+#define hello -5
+#define hey 5555
+
+program
 {
-int x = -015;
-string str1 = "hel\"lo\t\? man\"", str2;
-/*comment *
-here */
-write(x);
-//another comment /*
+ int a = 51, b = hello, c;
+ #undef hello
+ string x = "abc", y, z = "abcd";
+ bool hello = true;
+ c = (a + b) * 2; if (c >= 100 or x == z)
+ {
+M:  c = a / b; // hello
+ read (y);
+ write (y);
+ write (x + y + z, c);
+ }
+ else
+ c = a = 21;
+ while (c > 100)
+ {
+ c = c - 5;
+ write (c);
+ x = x + "step";
+ break;
+ }
+goto M;
+ write (x);
 }
-@

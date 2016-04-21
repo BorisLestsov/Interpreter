@@ -3,6 +3,11 @@ project(Interpreter)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 
-set(SOURCE_FILES interpreter_app.cpp Lex.cpp Lex.h parser.cpp parser.h scanner.cpp scanner.h lex_t.h ID.cpp ID.h)
+include_directories(sub_classes)
+set(CLASSES interpreter_app.cpp sub_classes/Lex.cpp sub_classes/Lex.h sub_classes/lex_t.h sub_classes/ID.cpp sub_classes/ID.h sub_classes/Exception.cpp sub_classes/Exception.h)
+add_library(MY_LIB STATIC ${CLASSES})
 
-add_executable(Interpreter ${SOURCE_FILES})
+set(SOURCE_FILES interpreter_app.cpp parser.cpp parser.h scanner.cpp scanner.h)
+set(TEST_FILES prog prog)
+
+add_executable(Interpreter ${SOURCE_FILES} ${CLASSES})

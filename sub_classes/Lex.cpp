@@ -3,7 +3,6 @@
 //
 
 #include "Lex.h"
-#include "scanner.h"
 
 Lex::Lex(): type(LEX_NULL) , value(0) {}
 Lex::Lex(lex_t type_par, int value_par):
