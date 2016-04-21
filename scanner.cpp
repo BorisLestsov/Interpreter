@@ -67,6 +67,8 @@ int Scanner::look(const string buf, const string table[]){
 void Scanner::start() throw(exception){
     int d, j, sign = 1;
     char com_type;
+    bool started;
+    int m_state = MACRO_NULL;
 
     STATE = H_ST;
     do {
@@ -95,13 +97,17 @@ void Scanner::start() throw(exception){
                     d = 0;
                     STATE = SIGN_ST;
                 } else if (c == '/') {
-                    STATE = COM_ST;
                     gc();
                     if(c == '/') {
+                        STATE = COM_ST;
                         com_type = '/';
                     } else if(c == '*') {
+                        STATE = COM_ST;
                         com_type = '*';
-                    } else throw Exception("Scanner error: expected \'/\' or\'*\'");
+                    } else {
+                        add_lex(LEX_SLASH, LEX_SLASH);
+                        STATE = H_ST;
+                    }
                 } else if (c == '!') {
                     STATE = NEQ_ST;
                     clear_buffer();
@@ -146,10 +152,16 @@ void Scanner::start() throw(exception){
                 if (isdigit(c))
                     d = d * 10 + (c - '0');
                 else {
-                    STATE = H_ST;
-                    ungetc(c, f);
                     d = d * sign;
-                    add_lex(LEX_NUM, d);
+                    if(m_state != MACRO_DEFINE){
+                        add_lex(LEX_NUM, d);
+                        STATE = H_ST;
+                        ungetc(c, f);
+                    }
+                    else {
+                        STATE = ADD_MACRO;
+                        m_state = DEFINE_FINISHED;
+                    }
                 }
                 break;
             case SIGN_ST:
@@ -237,17 +249,60 @@ void Scanner::start() throw(exception){
             case MACRO_ST:
                 if(isalpha(c)){
                     addc();
-                    j = look(buffer, MACRO_NAMES);
-                    if(j != LEX_NULL) {
+                    m_state = look(buffer, MACRO_NAMES);
+                    if(m_state != MACRO_NULL && m_state != DEFINE_FINISHED) {
+                        clear_buffer();
                         STATE = ADD_MACRO;
                     }
-                } else throw Exception("Scanner error: MACROS UNDER CONSTRUCTION");
+                } else throw Exception("Scanner error: Unknown macro: ", buffer);
                 break;
             case ADD_MACRO:
+                switch (m_state) {
+                    case MACRO_DEFINE:
+                        if(started){
+                            if(isalpha(c) || isdigit(c))
+                                addc();
+                            else {
+                                if(ID_TABLE.ispresent(buffer))
+                                    throw Exception("Scanner error: redefines unavaible", c);
+                                gc();
+                                sign = 1;
+                                if(c == '-'){ sign = -1; gc();}
+                                if(c == '+') gc();
+                                if(!isdigit(c)) throw Exception("Scanner error: expected number");
+                                else d = c - '0';
+                                STATE = NUMB_ST;
+                            }
+                        } else {
+                            if(isalpha(c)) {
+                                addc();
+                                started = true;
+                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                        }
+                        break;
+                    case MACRO_IFDEF:
+                        break;
+                    case MACRO_IFNDEF:
+                        break;
+                    case MACRO_ELSE:
+                        break;
+                    case MACRO_UNDEF:
+                        break;
+                    case MACRO_ENDIF:
+                        break;
+                    case DEFINE_FINISHED:
+                        if(c != '\n') throw Exception("Scanner error: define expected \\n");
+                        m_state = MACRO_NULL;
+                        STATE = H_ST;
+                        ID_TABLE.append(buffer, LEX_MACRO_NAME, d);
+                        break;
+                }
+                /*
                 if(isalpha(c)){
                     addc();
-                } else {}
+                } else if(c == '\n') {
 
+                } else throw Exception("Scanner error: unexpected symbol: ", c);*/
                 break;
         }
     } while (true);
@@ -274,6 +329,9 @@ const string Scanner::WORD_NAMES[] = {
         "while",
         "write",
         "struct",
+        "goto",
+        "break",
+        "continue",
         TBL_END
 };
 
@@ -306,6 +364,9 @@ const string Scanner::MACRO_NAMES[] = {
         "define",
         "ifdef",
         "ifndef",
+        "else",
+        "endif",
+        "undef",
         TBL_END
 };
 
@@ -329,6 +390,10 @@ const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_WHILE,
         LEX_WRITE,
         LEX_STRUCT,
+        LEX_GOTO,
+        LEX_BREAK,
+        LEX_CONTINUE,
+        LEX_MACRO_NAME,
         LEX_NULL
 };
 
@@ -398,6 +463,10 @@ string debug[] = {
         "LEX_GEQ",
         "LEX_STRC",
         "LEX_STRUCT",
+        "LEX_GOTO",
+        "LEX_BREAK",
+        "LEX_CONTINUE",
+        "LEX_MACRO_NAME",
         "LEX_NUM",
         "LEX_ID",
 };

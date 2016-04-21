@@ -44,6 +44,10 @@ enum lex_t {
         LEX_GEQ,
         LEX_STRC,
         LEX_STRUCT,
+        LEX_GOTO,
+        LEX_BREAK,
+        LEX_CONTINUE,
+        LEX_MACRO_NAME,
         LEX_NUM,
         LEX_ID
 };

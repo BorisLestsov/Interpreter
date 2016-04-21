@@ -11,6 +11,9 @@
 
 using namespace std;
 
+enum macro_t {MACRO_NULL, MACRO_DEFINE, MACRO_IFDEF, MACRO_IFNDEF, MACRO_ELSE, MACRO_ENDIF, MACRO_UNDEF, DEFINE_FINISHED
+};
+
 class Scanner{
     enum state_t {H_ST, ID_ST, NUMB_ST, SIGN_ST, STR_ST, COM_ST, ALE_ST, DELIM_ST, EQ_ST, NEQ_ST, MACRO_ST, ADD_MACRO};
     state_t STATE;
@@ -45,6 +48,6 @@ public:
     void start() throw(exception);
 };
 
-//TODO: proper exceptions
-//TODO: check on permissible symbols
-//TODO: defines
+//TODO: proper exceptions - DONE
+//TODO: check on permissible symbols - DONE
+//TODO: defines - SYKA BLYAT
