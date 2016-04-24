@@ -8,36 +8,38 @@
 #include "Lex.h"
 #include "Exception.h"
 #include <vector>
+#include <stack>
 #include "ID.h"
 
 using namespace std;
 
-extern map<lex_t, string> lex_map;
-
 class Parser{
     const vector<Lex>& lex_vec;
-    const ID_table_t& ID_table;
+    ID_table_t& ID_table;
     vector<Lex>::const_iterator index;
     Lex c_lex;
     lex_t c_type;
     int c_val;
+    lex_t tmp_type;
+    int tmp_val;
 
     //procedures:
     void PROGRAM();
-    void DESCRIPTIONS();
+    void DECLARATIONS();
+    void STRUCT_DECL();
     void OPERATORS();
-    void DESC();
-    void TYPE();
-    void VAR();
+    void DECL();
     //void CONST();
     void OP();
     void COMP_OP();
 
     //semantics checks:
 
+
     void gl();
+    void make_tmp();
 public:
-    Parser(const vector<Lex>& lex_vec_par, const ID_table_t& ID_table_par);
+    Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par);
     void start();
 };
 

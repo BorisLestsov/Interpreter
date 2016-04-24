@@ -16,8 +16,35 @@ lex_t ID::get_type() const{
     return type;
 }
 
+bool ID::get_declared() const{
+    return declared;
+}
+bool ID::get_assigned() const{
+    return assigned;
+}
+
 int ID::get_value() const{
     return value;
+}
+
+void ID::set_name(const string& str){
+    name = str;
+}
+
+void ID::set_type(lex_t type_par){
+    type = type_par;
+}
+
+void ID::set_declared(bool bool_par){
+    declared = bool_par;
+}
+
+void ID::set_assigned(bool bool_par){
+    assigned = bool_par;
+}
+
+void ID::set_val(int val_par){
+    value = val_par;
 }
 
 /*
@@ -70,10 +97,18 @@ void ID_table_t::print_table() const{
     vector<ID>::const_iterator ptr = table.cbegin();
     vector<ID>::const_iterator end  = table.cend();
 
-    cout << "------FOUND IDENTIFIERS:------" << endl;
+    cout << "------IDENTIFIERS:------" << endl;
+    cout << setw(15) << "type" << setw(15)
+    << "name" << setw(15) << "declared" << setw(15)
+    << "assigned" << setw(15) << "value" << endl << endl;
     while(ptr != end){
-        cout << setw(15) << Lex::lex_map[ptr->get_type()] << setw(15) <<
-                ptr->get_name() << setw(15) << ptr->get_value() << endl;
+        cout << setw(15) << Lex::lex_map[ptr->get_type()] << setw(15)
+        << ptr->get_name() << setw(15) << ptr->get_declared() << setw(15)
+        << ptr->get_assigned() << setw(15) << ptr->get_value() << endl;
         ++ptr;
     }
+}
+
+ID& ID_table_t::operator[](int i) {
+    return table[i];
 }

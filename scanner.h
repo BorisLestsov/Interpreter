@@ -11,8 +11,6 @@
 
 using namespace std;
 
-extern map<lex_t, string> lex_map;
-
 class Scanner{
     enum state_t {H_ST, ID_ST, NUMB_ST, SIGN_ST, STR_ST, COM_ST, ALE_ST, DELIM_ST,
         EQ_ST, NEQ_ST, MACRO_ST, ADD_MACRO};
@@ -31,6 +29,7 @@ class Scanner{
     static const lex_t WORD_LEXEMS[];
     static const lex_t DEL_LEXEMS[];
     static const string MACRO_NAMES[];
+    static ID_table_t m_table;
 
     //functions:
     inline void gc();
@@ -48,5 +47,6 @@ public:
     void print_vec() const;
     void start() throw(exception);
     vector<Lex>& get_lex_vec();
+    ID_table_t& get_ID_table();
 };
 

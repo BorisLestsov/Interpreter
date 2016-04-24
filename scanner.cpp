@@ -10,6 +10,7 @@
 using namespace std;
 
 ID_table_t Scanner::ID_table;
+ID_table_t Scanner::m_table;
 
 Scanner::Scanner(): lex_vec(0, Lex()) {
     clear_buffer();
@@ -30,6 +31,11 @@ Scanner::~Scanner(){
 vector<Lex>& Scanner::get_lex_vec() {
     return lex_vec;
 }
+
+ID_table_t& Scanner::get_ID_table() {
+    return ID_table;
+}
+
 
 inline void Scanner::gc(){
     c = (char) fgetc(f);
@@ -157,12 +163,13 @@ void Scanner::start() throw(exception){
                     if (j != 0) {
                         add_lex(WORD_LEXEMS[j], j);
                     } else {
-                        j = ID_table.append(buffer, LEX_ID);
-                        ID_ptr = ID_table.find(buffer);
-                        if(ID_ptr->get_type() == LEX_MACRO_NAME)
-                            add_lex(LEX_NUM, ID_ptr->get_value());
-                        else
+                        ID_ptr = m_table.find(buffer);
+                        if(ID_ptr == NULL){
+                            j = ID_table.append(buffer, LEX_ID);
                             add_lex(LEX_ID, j);
+                        } else{
+                            add_lex(LEX_NUM, ID_ptr->get_value());
+                        }
                     }
                 }
                 break;
@@ -279,7 +286,7 @@ void Scanner::start() throw(exception){
                             if(isalpha(c) || isdigit(c))
                                 addc();
                             else {
-                                if(ID_table.find(buffer) != NULL)
+                                if(m_table.find(buffer) != NULL)
                                     throw Exception("Scanner error: redefines unavaible", c);
                                 gc();
                                 sign = 1;
@@ -303,7 +310,7 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: ifdef expected \\n");
-                                if(ID_table.find(buffer) != NULL){
+                                if(m_table.find(buffer) != NULL){
                                     STATE = H_ST;
                                     skip_stack.push(SKIP_ELSE);
                                 } else {
@@ -331,7 +338,7 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: ifndef expected \\n");
-                                if(ID_table.find(buffer) == NULL){
+                                if(m_table.find(buffer) == NULL){
                                     STATE = H_ST;
                                     //skip = SKIP_ELSE;
                                     skip_stack.push(SKIP_ELSE);
@@ -367,9 +374,9 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: undef expected \\n");
-                                if(ID_table.find(buffer) == NULL)
+                                if(m_table.find(buffer) == NULL)
                                     throw Exception("Scanner error: identifier not found: ", buffer);
-                                ID_table.erase(buffer);
+                                m_table.erase(buffer);
                                 STATE = H_ST;
                                 M_STATE = MACRO_NULL;
                                 started = false;
@@ -385,7 +392,7 @@ void Scanner::start() throw(exception){
                         if(c != '\n') throw Exception("Scanner error: define expected \\n");
                         M_STATE = MACRO_NULL;
                         STATE = H_ST;
-                        ID_table.append(buffer, LEX_MACRO_NAME, d);
+                        m_table.append(buffer, LEX_MACRO_NAME, d);
                         break;
                 }
                 /*
