@@ -29,5 +29,9 @@ public:
     lex_t get_type() const;
     int get_value() const;
 
+
     friend ostream& operator<<(ostream& o, const Lex& lex_par);
+
+    static map<lex_t, string> lex_map;
+    static void construct_lex_map();
 };

@@ -7,11 +7,14 @@ int main(int argc, char* argv[]){
     try {
         if(argc < 2) throw Exception("Interpreter error: no file");
         Scanner main_scanner(argv[1]);
-        main_scanner.construct_lex_map();
+        Lex::construct_lex_map();
 
         main_scanner.start();
         main_scanner.print_vec();
-        main_scanner.ID_TABLE.print_table();
+        main_scanner.ID_table.print_table();
+
+        //Parser main_parser(main_scanner.get_lex_vec());
+
     }
     catch (exception& ex){
         cout << ex.what() << endl;

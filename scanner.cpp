@@ -9,7 +9,7 @@
 
 using namespace std;
 
-ID_table_t Scanner::ID_TABLE;
+ID_table_t Scanner::ID_table;
 
 Scanner::Scanner(): lex_vec(0, Lex()) {
     clear_buffer();
@@ -25,6 +25,10 @@ Scanner::Scanner(const char* input_f): lex_vec(0, Lex()){
 
 Scanner::~Scanner(){
     fclose(f);
+}
+
+vector<Lex>& Scanner::get_lex_vec() {
+    return lex_vec;
 }
 
 inline void Scanner::gc(){
@@ -46,11 +50,11 @@ void Scanner::add_lex(lex_t type_par, int val_par){
 void Scanner::print_vec() const{
     vector<Lex>::const_iterator ptr;
 
-    cout << "LEXEMS:" << endl;
+    cout << "------LEXEMS:------" << endl;
     ptr = lex_vec.cbegin();
     while(ptr != lex_vec.cend()){
         //cout << *ptr << endl;
-        cout << setw(15) << lex_map[ptr->get_type()] << setw(15) << ptr->get_value() << endl;
+        cout << setw(15) << Lex::lex_map[ptr->get_type()] << setw(15) << ptr->get_value() << endl;
         ptr++;
     }
 }
@@ -75,14 +79,14 @@ void Scanner::start() throw(exception){
     bool started = false;
     int M_STATE = MACRO_NULL;
     const ID* ID_ptr;
-    enum m_skip_t {SKIP_ELSE, SKIP_IF} skip;
+    enum m_skip_t {SKIP_ELSE, SKIP_IF};
     stack<m_skip_t> skip_stack;
 
     STATE = H_ST;
     do {
         gc();
         //usleep(250000);
-        cout << c << ' ' << STATE << endl;
+        //cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -153,8 +157,8 @@ void Scanner::start() throw(exception){
                     if (j != 0) {
                         add_lex(WORD_LEXEMS[j], j);
                     } else {
-                        j = ID_TABLE.append(buffer, LEX_ID);
-                        ID_ptr = ID_TABLE.find(buffer);
+                        j = ID_table.append(buffer, LEX_ID);
+                        ID_ptr = ID_table.find(buffer);
                         if(ID_ptr->get_type() == LEX_MACRO_NAME)
                             add_lex(LEX_NUM, ID_ptr->get_value());
                         else
@@ -201,7 +205,7 @@ void Scanner::start() throw(exception){
                         else addc();
                     }else throw Exception("Scanner error: unknown literal: ", c);
                 } else if(c == '\"'){
-                    j = ID_TABLE.append(buffer, LEX_STRC);
+                    j = ID_table.append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
                 } else addc();
@@ -275,7 +279,7 @@ void Scanner::start() throw(exception){
                             if(isalpha(c) || isdigit(c))
                                 addc();
                             else {
-                                if(ID_TABLE.find(buffer) != NULL)
+                                if(ID_table.find(buffer) != NULL)
                                     throw Exception("Scanner error: redefines unavaible", c);
                                 gc();
                                 sign = 1;
@@ -299,13 +303,11 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: ifdef expected \\n");
-                                if(ID_TABLE.find(buffer) != NULL){
+                                if(ID_table.find(buffer) != NULL){
                                     STATE = H_ST;
-                                    //skip = SKIP_ELSE;
                                     skip_stack.push(SKIP_ELSE);
                                 } else {
                                     M_STATE = MACRO_SKIP;
-                                    //skip = SKIP_IF;
                                     skip_stack.push(SKIP_IF);
                                 }
                                 started = false;
@@ -329,7 +331,7 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: ifndef expected \\n");
-                                if(ID_TABLE.find(buffer) == NULL){
+                                if(ID_table.find(buffer) == NULL){
                                     STATE = H_ST;
                                     //skip = SKIP_ELSE;
                                     skip_stack.push(SKIP_ELSE);
@@ -365,9 +367,9 @@ void Scanner::start() throw(exception){
                                 addc();
                             else {
                                 if(c != '\n') throw Exception("Scanner error: undef expected \\n");
-                                if(ID_TABLE.find(buffer) == NULL)
+                                if(ID_table.find(buffer) == NULL)
                                     throw Exception("Scanner error: identifier not found: ", buffer);
-                                ID_TABLE.erase(buffer);
+                                ID_table.erase(buffer);
                                 STATE = H_ST;
                                 M_STATE = MACRO_NULL;
                                 started = false;
@@ -383,7 +385,7 @@ void Scanner::start() throw(exception){
                         if(c != '\n') throw Exception("Scanner error: define expected \\n");
                         M_STATE = MACRO_NULL;
                         STATE = H_ST;
-                        ID_TABLE.append(buffer, LEX_MACRO_NAME, d);
+                        ID_table.append(buffer, LEX_MACRO_NAME, d);
                         break;
                 }
                 /*
@@ -507,70 +509,3 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_GEQ,
         LEX_NULL
 };
-
-//посмотреть результат
-
-string debug[] = {
-        "LEX_NULL",
-        "LEX_AND",
-        "LEX_BEGIN",
-        "LEX_BOOL",
-        "LEX_DO",
-        "LEX_ELSE",
-        "LEX_END",
-        "LEX_IF",
-        "LEX_FALSE",
-        "LEX_INT",
-        "LEX_STRING",
-        "LEX_NOT",
-        "LEX_OR",
-        "LEX_PROGRAM",
-        "LEX_READ",
-        "LEX_THEN",
-        "LEX_TRUE",
-        "LEX_VAR",
-        "LEX_WHILE",
-        "LEX_WRITE",
-        "LEX_SEMICOLON",
-        "LEX_COMMA",
-        "LEX_COLON",
-        "LEX_EQ",
-        "LEX_LPAREN",
-        "LEX_RPAREN",
-        "LEX_ASSIGN",
-        "LEX_LSS",
-        "LEX_GTR",
-        "LEX_PLUS",
-        "LEX_MINUS",
-        "LEX_TIMES",
-        "LEX_SLASH",
-        "LEX_LEQ",
-        "LEX_NEQ",
-        "LEX_GEQ",
-        "LEX_STRC",
-        "LEX_STRUCT",
-        "LEX_GOTO",
-        "LEX_BREAK",
-        "LEX_CONTINUE",
-        "LEX_MACRO_NAME",
-        "LEX_FIN",
-        "LEX_NUM",
-        "LEX_ID",
-};
-
-map<lex_t, string> Scanner::lex_map;
-
-void Scanner::construct_lex_map(){
-    lex_t i;
-    /*lex_map.insert(make_pair(LEX_NULL, WORD_NAMES[0]));
-    lex_map.insert(make_pair(LEX_NUM, "LEX_NUM"));
-    lex_map.insert(make_pair(LEX_ID, "LEX_ID"));
-    for(i = 1; WORD_LEXEMS[i] != LEX_NULL; ++i)
-        lex_map.insert(make_pair(WORD_LEXEMS[i], WORD_NAMES[i]));
-    for(i = 1; DEL_LEXEMS[i] != LEX_NULL; ++i)
-        lex_map.insert(make_pair(DEL_LEXEMS[i], DEL_NAMES[i]));*/
-    for(i = LEX_NULL; i != LEX_ID; ++i){
-        lex_map.insert(make_pair(i , debug[i]));
-    }
-    lex_map.insert(make_pair(i, debug[i]));
-}

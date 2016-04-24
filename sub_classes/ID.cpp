@@ -70,9 +70,10 @@ void ID_table_t::print_table() const{
     vector<ID>::const_iterator ptr = table.cbegin();
     vector<ID>::const_iterator end  = table.cend();
 
-    cout << "FOUND IDENTIFIERS:" << endl;
+    cout << "------FOUND IDENTIFIERS:------" << endl;
     while(ptr != end){
-        cout << setw(10) << ptr->get_type() << setw(15) <<ptr->get_name() << setw(15) << ptr->get_value() << endl;
+        cout << setw(15) << Lex::lex_map[ptr->get_type()] << setw(15) <<
+                ptr->get_name() << setw(15) << ptr->get_value() << endl;
         ++ptr;
     }
 }
