@@ -52,7 +52,7 @@ void Parser::DECLARATIONS() {
         gl();
     }
 
-    gl();
+    //gl();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         DECL();
         gl();

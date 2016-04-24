@@ -298,10 +298,13 @@ void Scanner::start() throw(exception){
                                 started = false;
                             }
                         } else {
+                            if(c != ' ' && c != '\t')
+                                throw Exception("Scanner error: define name must be identifier", c);
+                            gc();
                             if(isalpha(c)) {
                                 addc();
                                 started = true;
-                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                            } else throw Exception("Scanner error: define name must be identifier", c);
                         }
                         break;
                     case MACRO_IFDEF:
@@ -320,10 +323,13 @@ void Scanner::start() throw(exception){
                                 started = false;
                             }
                         } else {
+                            if(c != ' ' && c != '\t')
+                                throw Exception("Scanner error: define name must be identifier", c);
+                            gc();
                             if(isalpha(c)) {
                                 addc();
                                 started = true;
-                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                            } else throw Exception("Scanner error: define name must be identifier", c);
                         }
                         break;
                     case MACRO_SKIP:
@@ -350,10 +356,13 @@ void Scanner::start() throw(exception){
                                 started = false;
                             }
                         } else {
+                            if(c != ' ' && c != '\t')
+                                throw Exception("Scanner error: define name must be identifier", c);
+                            gc();
                             if(isalpha(c)) {
                                 addc();
                                 started = true;
-                            } else if(isdigit(c)) throw Exception("Scanner error: define name must be identifier", c);
+                            } else throw Exception("Scanner error: define name must be identifier", c);
                         }
                         break;
                     case MACRO_ELSE:
@@ -382,6 +391,9 @@ void Scanner::start() throw(exception){
                                 started = false;
                             }
                         } else {
+                            if(c != ' ' && c != '\t')
+                                throw Exception("Scanner error: define name must be identifier", c);
+                            gc();
                             if(isalpha(c)) {
                                 addc();
                                 started = true;
@@ -395,12 +407,6 @@ void Scanner::start() throw(exception){
                         m_table.append(buffer, LEX_MACRO_NAME, d);
                         break;
                 }
-                /*
-                if(isalpha(c)){
-                    addc();
-                } else if(c == '\n') {
-
-                } else throw Exception("Scanner error: unexpected symbol: ", c);*/
                 break;
         }
     } while (true);
