@@ -39,6 +39,7 @@ class Scanner{
     int look(const string buf, const string table[]);
 public:
     static ID_table_t ID_table;
+    static vector<ID_table_t> STRUCT_vec;
 
     Scanner(const char* input_f);
     Scanner();

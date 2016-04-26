@@ -2,7 +2,8 @@
 // Created by Boris on 10.04.2016.
 //
 #include "scanner.h"
-#include "parser.h"
+
+using namespace std;
 
 int main(int argc, char* argv[]){
     try {
@@ -13,10 +14,15 @@ int main(int argc, char* argv[]){
         main_scanner.start();
         main_scanner.print_vec();
         main_scanner.ID_table.print_table();
-
+        cout << "--------STRUCTURES--------" << endl;
+        int i;
+        for(i = 0; i < main_scanner.STRUCT_vec.size(); ++i){
+            main_scanner.STRUCT_vec[i].print_table();
+        }
+/*
         Parser main_parser(main_scanner.get_lex_vec(), main_scanner.get_ID_table());
         main_parser.start();
-        main_scanner.ID_table.print_table();
+        main_scanner.ID_table.print_table();*/
     }
     catch (exception& ex){
         cout << ex.what() << endl;

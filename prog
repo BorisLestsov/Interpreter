@@ -3,9 +3,17 @@
 
 program
 {
+ struct mystruct{
+  int i;
+  string a = "stst";
+ } s;
+ struct nextstruct{
+ int i;
+ bool b;
+ };
  int a = 51, b = hello, c;
  #undef hello
- string x = "abc", y, z = "abcd";
+ string x = "abc", y, z = "hey";
  bool hello = true;
  c = (a + b) * 2; if (c >= 100 or x == z)
  {

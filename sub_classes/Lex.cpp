@@ -70,6 +70,7 @@ string debug[] = {
         "LEX_BREAK",
         "LEX_CONTINUE",
         "LEX_MACRO_NAME",
+        "LEX_STRUCT_T",
         "LEX_FIN",
         "LEX_NUM",
         "LEX_ID",

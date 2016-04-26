@@ -9,6 +9,7 @@
 #include "Exception.h"
 #include <vector>
 #include <stack>
+#include <map>
 #include "ID.h"
 
 using namespace std;
@@ -33,6 +34,7 @@ class Parser{
     void OP();
     void COMP_OP();
 
+
     //semantics checks:
 
 
@@ -43,6 +45,8 @@ public:
     void start();
 };
 
+//TODO: how to store structures?
+//TODO: how to show wrong string of user's program?
 //TODO: Build Parser:
 //1) just procedures without semantic checks
 //2) with semantic checks

@@ -11,6 +11,7 @@ using namespace std;
 
 ID_table_t Scanner::ID_table;
 ID_table_t Scanner::m_table;
+vector<ID_table_t> Scanner::STRUCT_vec;
 
 Scanner::Scanner(): lex_vec(0, Lex()) {
     clear_buffer();
@@ -82,6 +83,11 @@ int Scanner::look(const string buf, const string table[]){
 void Scanner::start() throw(exception){
     int d, j, sign = 1;
     char com_type;
+
+    bool struct_name_defined = false;
+    bool struct_flag = false;
+    int struct_index = -1;
+
     bool started = false;
     int M_STATE = MACRO_NULL;
     const ID* ID_ptr;
@@ -92,7 +98,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        //cout << c << ' ' << STATE << endl;
+        cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -162,11 +168,29 @@ void Scanner::start() throw(exception){
                     ungetc(c, f);
                     if (j != 0) {
                         add_lex(WORD_LEXEMS[j], j);
+                        if(WORD_LEXEMS[j] == LEX_STRUCT){
+                            struct_flag = true;
+                        }
+                        if(struct_flag && WORD_LEXEMS[j] == LEX_END){
+                            struct_flag = false;
+                        }
                     } else {
                         ID_ptr = m_table.find(buffer);
                         if(ID_ptr == NULL){
-                            j = ID_table.append(buffer, LEX_ID);
-                            add_lex(LEX_ID, j);
+                            if(!struct_name_defined && struct_flag){
+                                struct_name_defined = true;
+                                j = ID_table.append(buffer, LEX_STRUCT_T);
+                                ID_table[j].set_val(struct_index);          //TODO: LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
+                                add_lex(LEX_ID, j);
+                                STRUCT_vec.push_back(ID_table_t());
+                                ++struct_index;
+                                STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
+                            } else if(struct_name_defined && struct_flag){              //TODO: Move string constants in struct from ID_table to struct_vec?
+                                STRUCT_vec[struct_index].append(buffer, LEX_ID);
+                            } else {
+                                j = ID_table.append(buffer, LEX_ID);
+                                add_lex(LEX_ID, j);
+                            }
                         } else{
                             add_lex(LEX_NUM, ID_ptr->get_value());
                         }
@@ -252,12 +276,16 @@ void Scanner::start() throw(exception){
                     add_lex(LEX_NEQ, LEX_NEQ);
                 } /*else {
                     add_lex(LEX_NOT);
-                }*/ //TODO: what should it be?
+                }*/ //TODO: !(a == b) - do I need it?
                 STATE = H_ST;
                 break;
             case DELIM_ST:
                 j = look(buffer, DEL_NAMES);
                 if(j != LEX_NULL){
+                    if(struct_flag && j == 2){
+                        struct_flag = false;
+                        struct_name_defined = false;
+                    }
                     add_lex(DEL_LEXEMS[j], j);
                     ungetc(c, f);
                 } else {
