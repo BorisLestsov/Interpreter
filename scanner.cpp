@@ -180,13 +180,14 @@ void Scanner::start() throw(exception){
                             if(!struct_name_defined && struct_flag){
                                 struct_name_defined = true;
                                 j = ID_table.append(buffer, LEX_STRUCT_T);
-                                ID_table[j].set_val(struct_index);          //TODO: LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
                                 add_lex(LEX_ID, j);
                                 STRUCT_vec.push_back(ID_table_t());
                                 ++struct_index;
-                                STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
+                                //STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
+                                ID_table[j].set_val(struct_index);          //TODO: LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
                             } else if(struct_name_defined && struct_flag){              //TODO: Move string constants in struct from ID_table to struct_vec?
-                                STRUCT_vec[struct_index].append(buffer, LEX_ID);
+                                j = STRUCT_vec[struct_index].append(buffer, LEX_ID);
+                                add_lex(LEX_ID, j);
                             } else {
                                 j = ID_table.append(buffer, LEX_ID);
                                 add_lex(LEX_ID, j);

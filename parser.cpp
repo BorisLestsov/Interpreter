@@ -4,9 +4,10 @@
 
 #include "parser.h"
 
-Parser::Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par):
+Parser::Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par, vector<ID_table_t>& STRUCT_vec_par):
         lex_vec(lex_vec_par),
-        ID_table(ID_table_par)
+        ID_table(ID_table_par),
+        STRUCT_vec(STRUCT_vec_par)
 {
     index = lex_vec.cbegin();
 }
@@ -60,57 +61,55 @@ void Parser::DECLARATIONS() {
 }
 
 void Parser::STRUCT_DECL() {
+    int cur_struct_index;
+
     gl();
-    if(c_type != LEX_ID) throw Exception("Parser error: expecded ID but got lexem: ", Lex::lex_map[c_type]);
+    if(c_type == LEX_ID) {
+        cur_struct_index = ID_table[c_val].get_value();
+    } else throw Exception("Parser error: expecded ID but got lexem: ", Lex::lex_map[c_type]);
     gl();
     if(c_type != LEX_BEGIN) throw Exception("Parser error: expected { but got lexem: ", Lex::lex_map[c_type]);
     gl();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
+        SWITCH_ID(STRUCT_vec[cur_struct_index]);
         gl();
-        while(c_type != LEX_SEMICOLON){
-            if(c_type == LEX_ID) {
-                ID_table[c_val].set_declared(true);
-                ID_table[c_val].set_type(LEX_INT);
-            } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
-            make_tmp();
+    }
+    if(c_type != LEX_END) throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
+    gl();
+    while(c_type != LEX_SEMICOLON){
+        if(c_type == LEX_ID){
+            ID_table[c_val].set_type(LEX_STRUCT); //TODO: or LEX_STRUCT_T?
+            //ID_table[c_val].set_val(); TODO: WHAT IT IS SUPPOSED TO BE?
+            ID_table[c_val].set_declared(true);
+        } else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
+        gl();
+        if(c_type == LEX_COMMA)
             gl();
-            if(c_type == LEX_ASSIGN) {
-                gl();
-                if (c_type == LEX_NUM) {
-                    ID_table[tmp_val].set_assigned(true);
-                    ID_table[tmp_val].set_val(c_val);
-                } else throw Exception("Parser error: expected number but got lexem: ", Lex::lex_map[c_type]);
-                gl();
-            } else
-                ID_table[tmp_val].set_assigned(false);
-            if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
-                continue;
-            else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
-        }
+        if(c_type != LEX_ID && c_type != LEX_SEMICOLON)
+            throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
     }
 }
 
-
-void Parser::DECL(){
+void Parser::SWITCH_ID(ID_table_t& table) {
     switch (c_type) {
         case LEX_INT:
             while(c_type != LEX_SEMICOLON){
                 gl();
                 if(c_type == LEX_ID) {
-                    ID_table[c_val].set_declared(true);
-                    ID_table[c_val].set_type(LEX_INT);
+                    table[c_val].set_declared(true);
+                    table[c_val].set_type(LEX_INT);
                 } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 gl();
                 if(c_type == LEX_ASSIGN) {
                     gl();
                     if (c_type == LEX_NUM) {
-                        ID_table[tmp_val].set_assigned(true);
-                        ID_table[tmp_val].set_val(c_val);
+                        table[tmp_val].set_assigned(true);
+                        table[tmp_val].set_val(c_val);
                     } else throw Exception("Parser error: expected number but got lexem: ", Lex::lex_map[c_type]);
                     gl();
                 } else
-                    ID_table[tmp_val].set_assigned(false);
+                    table[tmp_val].set_assigned(false);
                 if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
                     continue;
                 else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
@@ -120,22 +119,25 @@ void Parser::DECL(){
             while(c_type != LEX_SEMICOLON){
                 gl();
                 if(c_type == LEX_ID) {
-                    ID_table[c_val].set_declared(true);
-                    ID_table[c_val].set_type(LEX_BOOL);
+                    table[c_val].set_declared(true);
+                    table[c_val].set_type(LEX_BOOL);
                 } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 gl();
                 if(c_type == LEX_ASSIGN) {
                     gl();
-                    if (c_type == LEX_TRUE || c_type == LEX_FALSE) {
-                        ID_table[tmp_val].set_assigned(true);
-                        ID_table[tmp_val].set_val(c_val);
+                    if (c_type == LEX_TRUE) {
+                        table[tmp_val].set_assigned(true);
+                        table[tmp_val].set_val(1);
+                    } else if(c_type == LEX_FALSE){
+                        table[tmp_val].set_assigned(true);
+                        table[tmp_val].set_val(0);
                     } else
                         throw Exception("Parser error: expected bool constant but get lexem: ", Lex::lex_map[c_type]);
                     gl();
                 } else
-                    ID_table[tmp_val].set_assigned(false);
-                 if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
+                    table[tmp_val].set_assigned(false);
+                if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
                     continue;
                 else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
             }
@@ -144,20 +146,20 @@ void Parser::DECL(){
             while(c_type != LEX_SEMICOLON){
                 gl();
                 if(c_type == LEX_ID) {
-                    ID_table[c_val].set_declared(true);
-                    ID_table[c_val].set_type(LEX_STRING);
+                    table[c_val].set_declared(true);
+                    table[c_val].set_type(LEX_STRING);
                 } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 gl();
                 if(c_type == LEX_ASSIGN){
                     gl();
                     if(c_type == LEX_STRC){
-                        ID_table[tmp_val].set_assigned(true);
-                        ID_table[tmp_val].set_val(c_val);
+                        table[tmp_val].set_assigned(true);
+                        table[tmp_val].set_val(c_val);
                     } else throw Exception("Parser error: expected string constant but got lexem: ", Lex::lex_map[c_type]);
                     gl();
                 } else
-                    ID_table[tmp_val].set_assigned(false);
+                    table[tmp_val].set_assigned(false);
                 if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
                     continue;
                 else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
@@ -165,6 +167,10 @@ void Parser::DECL(){
             break;
         default: throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
     }
+}
+
+void Parser::DECL(){
+    SWITCH_ID(ID_table);
 }
 
 void Parser::OPERATORS(){

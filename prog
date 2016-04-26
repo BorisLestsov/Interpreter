@@ -9,7 +9,7 @@ program
  } s;
  struct nextstruct{
  int i;
- bool b;
+ bool b = false;
  };
  int a = 51, b = hello, c;
  #undef hello

@@ -18,6 +18,7 @@ class Parser{
     const vector<Lex>& lex_vec;
     ID_table_t& ID_table;
     vector<Lex>::const_iterator index;
+    vector<ID_table_t>& STRUCT_vec;
     Lex c_lex;
     lex_t c_type;
     int c_val;
@@ -34,6 +35,7 @@ class Parser{
     void OP();
     void COMP_OP();
 
+    void SWITCH_ID(ID_table_t& table);
 
     //semantics checks:
 
@@ -41,7 +43,7 @@ class Parser{
     void gl();
     void make_tmp();
 public:
-    Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par);
+    Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par, vector<ID_table_t>& STRUCT_vec_par);
     void start();
 };
 
