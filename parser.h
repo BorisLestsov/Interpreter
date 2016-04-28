@@ -33,12 +33,22 @@ class Parser{
     void DECL();
     //void CONST();
     void OP();
-    void COMP_OP();
+    void COMPLEX_OP();
+    void EXPRESSION();
+    void HIGH();
+    void LOW();
+    void F();
+
 
     void SWITCH_ID(ID_table_t& table);
 
     //semantics checks:
-
+    bool eq_bool();
+    bool eq_type();
+    bool check_id_in_read();
+    bool check_id();
+    bool check_op();
+    bool check_not();
 
     void get_lex();
     void make_tmp();
