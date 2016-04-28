@@ -5,8 +5,18 @@
 #include "ID.h"
 #include "Exception.h"
 
-ID::ID(lex_t lex_par, const string& name_par, int val_par): type(lex_par), name(name_par), value(val_par){}
-ID::ID(lex_t lex_par, const char* name_par, int val_par): type(lex_par), name(name_par), value(val_par){};
+ID::ID(lex_t lex_par, const string& name_par, int val_par):
+        type(lex_par),
+        name(name_par),
+        value(val_par),
+        declared(false),
+        assigned(false){}
+ID::ID(lex_t lex_par, const char* name_par, int val_par):
+        type(lex_par),
+        name(name_par),
+        value(val_par),
+        declared(false),
+        assigned(false){};
 
 string ID::get_name() const{
     return name;
@@ -111,4 +121,8 @@ void ID_table_t::print_table() const{
 
 ID& ID_table_t::operator[](int i) {
     return table[i];
+}
+
+bool ID_table_t::multiple_declaration(const string &name) const {
+    return this->find(name)->get_declared();
 }

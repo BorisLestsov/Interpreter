@@ -40,7 +40,7 @@ class Parser{
     //semantics checks:
 
 
-    void gl();
+    void get_lex();
     void make_tmp();
 public:
     Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par, vector<ID_table_t>& STRUCT_vec_par);
