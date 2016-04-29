@@ -123,6 +123,6 @@ ID& ID_table_t::operator[](int i) {
     return table[i];
 }
 
-bool ID_table_t::multiple_declaration(const string &name) const {
-    return this->find(name)->get_declared();
+bool ID_table_t::multiple_declaration(int i) const {
+    return table[i].get_declared();
 }

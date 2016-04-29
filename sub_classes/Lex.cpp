@@ -50,6 +50,7 @@ void Lex::construct_lex_map(){
             "LEX_TRUE",
             "LEX_VAR",
             "LEX_WHILE",
+            "LEX_FOR",
             "LEX_WRITE",
             "LEX_SEMICOLON",
             "LEX_COMMA",
@@ -74,12 +75,18 @@ void Lex::construct_lex_map(){
             "LEX_CONTINUE",
             "LEX_MACRO_NAME",
             "LEX_STRUCT_T",
+            "LEX_LABEL",
             "LEX_FIN",
             "LEX_NUM",
             "LEX_ID",
+            "RPN_GO",
+            "RPN_FGO",
+            "RPN_LABEL",
+            "RPN_ADDRESS",
+            "__END_TBL"
     };
 
-    for(i = LEX_NULL; i != LEX_ID; ++i){
+    for(i = LEX_NULL; i != __END_TBL; ++i){
         lex_map.insert(make_pair(i , debug[i]));
     }
     lex_map.insert(make_pair(i, debug[i]));

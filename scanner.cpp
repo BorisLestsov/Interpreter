@@ -98,7 +98,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        cout << c << ' ' << STATE << endl;
+        //cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -184,7 +184,7 @@ void Scanner::start() throw(exception){
                                 STRUCT_vec.push_back(ID_table_t());
                                 ++struct_index;
                                 //STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
-                                ID_table[j].set_val(struct_index);          //TODO: LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
+                                ID_table[j].set_val(struct_index);          // LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
                             } else if(struct_name_defined && struct_flag){              //TODO: Move string constants in struct from ID_table to struct_vec?
                                 j = STRUCT_vec[struct_index].append(buffer, LEX_ID);
                                 add_lex(LEX_ID, j);
@@ -192,7 +192,7 @@ void Scanner::start() throw(exception){
                                 j = ID_table.append(buffer, LEX_ID);
                                 add_lex(LEX_ID, j);
                             }
-                        } else{
+                        } else {
                             add_lex(LEX_NUM, ID_ptr->get_value());
                         }
                     }
@@ -261,6 +261,7 @@ void Scanner::start() throw(exception){
                 } else {
                     j = look(buffer, DEL_NAMES);
                     add_lex(DEL_LEXEMS[j], j);
+                    ungetc(c, f);
                     STATE = H_ST;
                 }
                 break;
@@ -269,6 +270,7 @@ void Scanner::start() throw(exception){
                     add_lex(LEX_EQ, LEX_EQ);
                 } else {
                     add_lex(LEX_ASSIGN, LEX_ASSIGN);
+                    ungetc(c,f);
                 }
                 STATE = H_ST;
                 break;
@@ -460,6 +462,7 @@ const string Scanner::WORD_NAMES[] = {
         "true",
         "var",
         "while",
+        "for",
         "write",
         "struct",
         "goto",
@@ -520,6 +523,7 @@ const lex_t Scanner::WORD_LEXEMS[] = {
         LEX_TRUE,
         LEX_VAR,
         LEX_WHILE,
+        LEX_FOR,
         LEX_WRITE,
         LEX_STRUCT,
         LEX_GOTO,

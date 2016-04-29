@@ -43,5 +43,5 @@ public:
     void erase(const string& name);
     ID& operator[] (int i);
     void print_table() const;
-    bool multiple_declaration(const string &name) const;
+    bool multiple_declaration(int id) const;
 };

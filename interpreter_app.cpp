@@ -29,6 +29,8 @@ int main(int argc, char* argv[]){
         for(i = 0; i < main_scanner.STRUCT_vec.size(); ++i){
             main_scanner.STRUCT_vec[i].print_table();
         }
+        cout << "$$$$$$$$$$ PROG $$$$$$$$$$$" << endl;
+        main_parser.prog.print();
     }
     catch (exception& ex){
         cout << ex.what() << endl;

@@ -34,7 +34,7 @@ void Parser::PROGRAM(){
     get_lex();
     if(c_type == LEX_PROGRAM)
         DECLARATIONS();
-    else throw Exception("Parser error: expected \"program\" but got lexem: ", Lex::lex_map[c_type]);
+    else throw Exception("Parser error: expected \"program\" but recieved lexem: ", Lex::lex_map[c_type]);
     OPERATORS();
     /*if(c_type != LEX_FIN)
         throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);*/
@@ -44,7 +44,7 @@ void Parser::PROGRAM(){
 void Parser::DECLARATIONS() {
     get_lex();
     if(c_type != LEX_BEGIN)
-        throw Exception("Parser error: expected { but got lexem: ", Lex::lex_map[c_type]);
+        throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
     //push { to stack?
 
     get_lex();
@@ -66,9 +66,9 @@ void Parser::STRUCT_DECL() {
     get_lex();
     if(c_type == LEX_ID) {
         cur_struct_index = ID_table[c_val].get_value();
-    } else throw Exception("Parser error: expecded ID but got lexem: ", Lex::lex_map[c_type]);
+    } else throw Exception("Parser error: expecded ID but recieved lexem: ", Lex::lex_map[c_type]);
     get_lex();
-    if(c_type != LEX_BEGIN) throw Exception("Parser error: expected { but got lexem: ", Lex::lex_map[c_type]);
+    if(c_type != LEX_BEGIN) throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
     get_lex();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         SWITCH_ID(STRUCT_vec[cur_struct_index]);
@@ -96,11 +96,11 @@ void Parser::SWITCH_ID(ID_table_t& table) {
             while(c_type != LEX_SEMICOLON){
                 get_lex();
                 if(c_type == LEX_ID) {
-                    if(table.multiple_declaration(table[c_val].get_name()))
+                    if(table.multiple_declaration(c_val))
                         throw Exception("Parser error: multiple declaration of : ", table[c_val].get_name());
                     table[c_val].set_declared(true);
                     table[c_val].set_type(LEX_INT);
-                } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
+                } else throw Exception("Parser error: expected ID but recieved lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 get_lex();
                 if(c_type == LEX_ASSIGN) {
@@ -108,7 +108,7 @@ void Parser::SWITCH_ID(ID_table_t& table) {
                     if (c_type == LEX_NUM) {
                         table[tmp_val].set_assigned(true);
                         table[tmp_val].set_val(c_val);
-                    } else throw Exception("Parser error: expected number but got lexem: ", Lex::lex_map[c_type]);
+                    } else throw Exception("Parser error: expected number but recieved lexem: ", Lex::lex_map[c_type]);
                     get_lex();
                 } else
                     table[tmp_val].set_assigned(false);
@@ -121,11 +121,11 @@ void Parser::SWITCH_ID(ID_table_t& table) {
             while(c_type != LEX_SEMICOLON){
                 get_lex();
                 if(c_type == LEX_ID) {
-                    if(table.multiple_declaration(table[c_val].get_name()))
+                    if(table.multiple_declaration(c_val))
                         throw Exception("Parser error: multiple declaration of : ", table[c_val].get_name());
                     table[c_val].set_declared(true);
                     table[c_val].set_type(LEX_BOOL);
-                } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
+                } else throw Exception("Parser error: expected ID but recieved lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 get_lex();
                 if(c_type == LEX_ASSIGN) {
@@ -150,11 +150,11 @@ void Parser::SWITCH_ID(ID_table_t& table) {
             while(c_type != LEX_SEMICOLON){
                 get_lex();
                 if(c_type == LEX_ID) {
-                    if(table.multiple_declaration(table[c_val].get_name()))
+                    if(table.multiple_declaration(c_val))
                         throw Exception("Parser error: multiple declaration of : ", table[c_val].get_name());
                     table[c_val].set_declared(true);
                     table[c_val].set_type(LEX_STRING);
-                } else throw Exception("Parser error: expected ID but got lexem: ", Lex::lex_map[c_type]);
+                } else throw Exception("Parser error: expected ID but recieved lexem: ", Lex::lex_map[c_type]);
                 make_tmp();
                 get_lex();
                 if(c_type == LEX_ASSIGN){
@@ -162,7 +162,7 @@ void Parser::SWITCH_ID(ID_table_t& table) {
                     if(c_type == LEX_STRC){
                         table[tmp_val].set_assigned(true);
                         table[tmp_val].set_val(c_val);
-                    } else throw Exception("Parser error: expected string constant but got lexem: ", Lex::lex_map[c_type]);
+                    } else throw Exception("Parser error: expected string constant but recieved lexem: ", Lex::lex_map[c_type]);
                     get_lex();
                 } else
                     table[tmp_val].set_assigned(false);
@@ -180,129 +180,151 @@ void Parser::DECL(){
 }
 
 void Parser::OPERATORS(){
-    while(c_type != LEX_FIN){
+    while(c_type != LEX_FIN && c_type != LEX_END){
         OP();
     }
+    get_lex();
+    if (c_type != LEX_FIN)
+        throw Exception("Parser error: expected LEX_FIN but recieved lexem: ", Lex::lex_map[c_type]);
 }
 
 void Parser::OP(){
-    int pl0, pl1, pl2, pl3;
+    int blank_pos0, blank_pos1, blank_pos2, blank_pos3;
 
     switch (c_type) {
         case LEX_IF:
             get_lex();
             EXPRESSION();
             eq_bool();
-            /*pl2 = prog.get_free ();
+            blank_pos2 = prog.get_pos ();
             prog.blank();
-            prog.put_lex (Lex(POLIZ_FGO));*/
+            prog.push_back(Lex(RPN_FGO));
             if (c_type == LEX_THEN) {
                 get_lex();
                 OP();
-                /*pl3 = prog.get_free();
+                blank_pos3 = prog.get_pos();
                 prog.blank();
-                prog.put_lex (Lex(POLIZ_GO));
-                prog.put_lex (Lex(POLIZ_LABEL, prog.get_free()),pl2);*/
+                prog.push_back(Lex(RPN_GO));
+                prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
                 if (c_type == LEX_ELSE) {
                     get_lex();
                     OP();
-                    //prog.put_lex(Lex(POLIZ_LABEL,prog.get_free()),pl3);
+                    prog[blank_pos3] = Lex(RPN_LABEL,prog.get_pos());
                 }
             } else
                 throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
             break;
-            //end if
         case LEX_WHILE:
-            //pl0 = prog.get_free();
+            blank_pos0 = prog.get_pos();
             get_lex();
             EXPRESSION();
             eq_bool();
-            /*pl1 = prog.get_free();
+            blank_pos1 = prog.get_pos();
             prog.blank();
-            prog.put_lex(Lex(POLIZ_FGO));*/
+            prog.push_back(Lex(RPN_FGO));
             if (c_type == LEX_DO) {
                 get_lex();
                 OP();
-                /*prog.put_lex(Lex(POLIZ_LABEL, pl0));
-                prog.put_lex(Lex(POLIZ_GO));
-                prog.put_lex(Lex(POLIZ_LABEL, prog.get_free()), pl1);*/
+                prog.push_back(Lex(RPN_LABEL, blank_pos0));
+                prog.push_back(Lex(RPN_GO));
+                prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
             }
             else
                 throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
-            break; //end while
+            break;
         case LEX_READ:
+            get_lex();
+            if (c_type == LEX_LPAREN) {
                 get_lex();
-                if (c_type == LEX_LPAREN) {
+                if (c_type == LEX_ID) {
+                    check_id_in_read();
+                    prog.push_back(Lex(RPN_ADDRESS, c_val));
                     get_lex();
-                    if (c_type == LEX_ID) {
-                        check_id_in_read();
-                        //prog.put_lex(Lex(POLIZ_ADDRESS, c_val));
-                        get_lex();
-                    }
-                    else
-                        throw Exception("Parser error: expected ID but recieved : ", Lex::lex_map[c_type]);
-                    if (c_type == LEX_RPAREN) {
-                        get_lex();
-                        //prog.put_lex(Lex(LEX_READ));
-                    }
-                    else
-                        throw Exception("Parser error:  expected \")\" but recieved: ", Lex::lex_map[c_type]);
                 }
                 else
-                    throw Exception("Parser error:  expected \"(\" but recieved: ", Lex::lex_map[c_type]);
-            break; //end read
+                    throw Exception("Parser error: expected ID but recieved : ", Lex::lex_map[c_type]);
+                if (c_type == LEX_RPAREN) {
+                    get_lex();
+                    prog.push_back(Lex(LEX_READ));
+                }
+                else
+                    throw Exception("Parser error:  expected \")\" but recieved: ", Lex::lex_map[c_type]);
+            }
+            else
+                throw Exception("Parser error:  expected \"(\" but recieved: ", Lex::lex_map[c_type]);
+            break;
         case LEX_WRITE:
+            get_lex();
+            if (c_type == LEX_LPAREN) {
                 get_lex();
-                if (c_type == LEX_LPAREN) {
+                EXPRESSION();
+                if (c_type == LEX_RPAREN) {
                     get_lex();
-                    EXPRESSION();
-                    if (c_type == LEX_RPAREN) {
-                        get_lex();
-                        //prog.put_lex(Lex(LEX_WRITE));
-                    }
-                    else
-                        throw Exception("Parser error:  expected \")\" but recieved: ", Lex::lex_map[c_type]);
+                    prog.push_back(Lex(LEX_WRITE));
                 }
                 else
-                    throw Exception("Parser error:  expected \"(\" but recieved: ", Lex::lex_map[c_type]);
-            break; //end write
+                    throw Exception("Parser error:  expected \")\" but recieved: ", Lex::lex_map[c_type]);
+            }
+            else
+                throw Exception("Parser error:  expected \"(\" but recieved: ", Lex::lex_map[c_type]);
+            break;
         case LEX_ID:
-                check_id();
-                //prog.put_lex(Lex(POLIZ_ADDRESS, c_val));
-                get_lex();
-                if (c_type == LEX_ASSIGN /* || c_type == LEX_COLON*/) {
-                    // M: LEX_ID should be changed to LEX_LABEL and "DECLARED" must be set
+            make_tmp();
+            get_lex();
+            switch (c_type) {
+                case LEX_ASSIGN:
+                    if ( !(ID_table[tmp_val].get_declared()) )
+                        throw Exception("Parser error: use of undeclared ID: ", ID_table[c_val].get_name());
+                    prog.push_back(Lex(RPN_ADDRESS, tmp_val));
+                    lex_stack.push(ID_table[tmp_val].get_type());
                     get_lex();
                     EXPRESSION();
-                    eq_type();
-                    //prog.put_lex(Lex(LEX_ASSIGN));
-                }
-                else
+                    check_assign();
+                    prog.push_back(Lex(LEX_ASSIGN));
+                    break;
+                case LEX_COLON:
+                    ID_table[tmp_val].set_type(LEX_LABEL);
+                    if(ID_table.multiple_declaration(tmp_val))
+                        throw Exception("Parser error: multiple declaration of Label: ", ID_table[tmp_val].get_name());
+                    ID_table[tmp_val].set_val(prog.get_pos());
+                    ID_table[tmp_val].set_declared(true);
+                    c_type = LEX_SEMICOLON;
+                    break;
+                default:
                     throw Exception("Parser error: unxpected lexem: ", Lex::lex_map[c_type]);
-            break; //assign-end
+            }
+            break;
         case LEX_BEGIN:
             COMPLEX_OP();
             break;
         case LEX_SEMICOLON:
             get_lex();
             break;
+        case LEX_BREAK:
+            throw Exception("Parser error: IN DEVELOPEMENT: ", Lex::lex_map[c_type]);
+            get_lex();
+            break;
+        case LEX_GOTO:
+            throw Exception("Parser error: IN DEVELOPEMENT: ", Lex::lex_map[c_type]);
+            get_lex();
+            break;
+        case LEX_FOR:
+            throw Exception("Parser error: IN DEVELOPEMENT: ", Lex::lex_map[c_type]);
+            get_lex();
+            break;
         default:
-            throw Exception("Parser error: /*default reached*/: unxpected lexem: ", Lex::lex_map[c_type]);
+            throw Exception("Parser error: Unknown operator: ", Lex::lex_map[c_type]);
             break;
     }
 }
 
 void Parser::COMPLEX_OP(){
-    if ( c_type == LEX_BEGIN )
-    {
-        get_lex();
-        OP();
-        while ( c_type == LEX_SEMICOLON )
-        {
+    if ( c_type == LEX_BEGIN ) {
+        do {
             get_lex();
             if(c_type == LEX_END) break;
             OP();
-        }
+        } while  ( c_type == LEX_SEMICOLON );
         if ( c_type == LEX_END )
             get_lex();
         else
@@ -317,7 +339,7 @@ void Parser::EXPRESSION() {
     if ( c_type == LEX_EQ || c_type == LEX_LSS || c_type == LEX_GTR ||
          c_type == LEX_LEQ || c_type == LEX_GEQ || c_type == LEX_NEQ )
     {
-        //st_lex.push (c_type);
+        lex_stack.push (c_type);
         get_lex();
         LOW();
         check_op();
@@ -326,9 +348,8 @@ void Parser::EXPRESSION() {
 
 void Parser::LOW() {
     HIGH();
-    while ( c_type == LEX_PLUS || c_type == LEX_MINUS || c_type == LEX_OR )
-    {
-        //st_lex.push (c_type);
+    while ( c_type == LEX_PLUS || c_type == LEX_MINUS || c_type == LEX_OR ) {
+        lex_stack.push(c_type);
         get_lex();
         HIGH();
         check_op();
@@ -337,9 +358,8 @@ void Parser::LOW() {
 
 void Parser::HIGH() {
     F();
-    while ( c_type == LEX_TIMES || c_type == LEX_SLASH || c_type == LEX_AND )
-    {
-        //st_lex.push (c_type);
+    while ( c_type == LEX_TIMES || c_type == LEX_SLASH || c_type == LEX_AND ) {
+        lex_stack.push (c_type);
         get_lex();
         F();
         check_op();
@@ -351,22 +371,23 @@ void Parser::F ()
     switch (c_type){
         case LEX_ID:
             check_id();
-            //prog.put_lex (Lex (LEX_ID, c_val));
+            lex_stack.push(ID_table[c_val].get_type());
+            prog.push_back (Lex (LEX_ID, c_val));
             get_lex();
             break;
         case LEX_NUM:
-            //st_lex.push ( LEX_INT );
-            //prog.put_lex ( curr_lex );
+            lex_stack.push ( LEX_INT );
+            prog.push_back ( c_lex );
             get_lex();
         break;
         case LEX_TRUE:
-            //st_lex.push ( LEX_BOOL );
-            //prog.put_lex (Lex (LEX_TRUE, 1) );
+            lex_stack.push ( LEX_BOOL );
+            prog.push_back (Lex (LEX_TRUE, 1) );
             get_lex();
             break;
         case LEX_FALSE:
-            //st_lex.push ( LEX_BOOL );
-            //prog.put_lex (Lex (LEX_FALSE, 0) );
+            lex_stack.push ( LEX_BOOL );
+            prog.push_back (Lex (LEX_FALSE, 0) );
             get_lex();
             break;
         case LEX_NOT:
@@ -382,32 +403,89 @@ void Parser::F ()
             else
                 throw Exception("Parser error: expected \"(\" but recieved: ", Lex::lex_map[c_type]);
             break;
+        case LEX_STRC:
+            lex_stack.push ( LEX_STRC );
+            prog.push_back ( c_lex );
+            get_lex();
+            break;
         default: throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
     }
 }
 
 
 //-------------symantics check:--------------
-bool Parser::eq_bool() {
-    return false;
+void Parser::eq_bool() {
+    if ( lex_stack.top() != LEX_BOOL )
+        throw "expression is not boolean";
+    lex_stack.pop();
 }
 
-bool Parser::eq_type() {
-    return false;
+void Parser::check_id_in_read() {
+    if ( !(ID_table[c_val].get_declared()) )
+        throw Exception("Parser error: use of undeclared ID in read: ", ID_table[c_val].get_name());
 }
 
-bool Parser::check_id_in_read() {
-    return false;
+void Parser::check_id() {
+    if ( !(ID_table[c_val].get_declared()) )
+        throw Exception("Parser error: use of undeclared ID: ", ID_table[c_val].get_name());
 }
 
-bool Parser::check_id() {
-    return false;
+void Parser::check_op() {
+    lex_t operand1, operand2, operation, t, result_type;
+    operand2 = lex_stack.top();
+    lex_stack.pop();
+    operation = lex_stack.top();
+    lex_stack.pop();
+    operand1 = lex_stack.top();
+    lex_stack.pop();
+
+    /*if (operand1 != operand2)
+        throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);*/
+
+    if(operand1 == LEX_INT){
+        if(operation == LEX_PLUS || operation == LEX_MINUS ||
+                operation == LEX_TIMES || operation == LEX_SLASH || operation == LEX_ASSIGN){
+            result_type = LEX_INT;
+        } else if ( operation == LEX_EQ || operation == LEX_LSS || operation == LEX_GTR ||
+                    operation == LEX_LEQ || operation == LEX_GEQ || operation == LEX_NEQ ){
+            result_type = LEX_BOOL;
+        } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+        if (operand1 != operand2)
+            throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+    } else if(operand1 == LEX_BOOL){
+        if(operation == LEX_OR || operation == LEX_AND){
+            result_type = LEX_BOOL;
+        } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+        if (operand1 != operand2)
+            throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+    } else if(operand1 == LEX_STRING || operand1 == LEX_STRC){
+        if(operation == LEX_PLUS){
+            result_type = LEX_STRING;
+        } else if(operation == LEX_EQ || operation == LEX_NEQ ){
+            result_type = LEX_STRING;
+        } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+        if (operand2 != LEX_STRING && operand2 != LEX_STRC)
+            throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
+    } else throw Exception("Parser error: wrong lexem: ", Lex::lex_map[operation]);
+    lex_stack.push(result_type);
+    prog.push_back(operation);
+
 }
 
-bool Parser::check_op() {
-    return false;
+void Parser::check_not() {
+    if (lex_stack.top() != LEX_BOOL)
+        throw Exception("Parser error: wrong type in \"not\"");
+    else
+    {
+        lex_stack.pop();
+        lex_stack.push (LEX_BOOL);
+        prog.push_back(LEX_NOT);
+    }
 }
 
-bool Parser::check_not() {
-    return false;
+void Parser::check_assign() {
+    if ( lex_stack.top() != lex_stack.top() )
+        throw Exception("Parser error: wrong types in assign");
+    lex_stack.pop();
+    lex_stack.pop();
 }
