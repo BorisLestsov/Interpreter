@@ -3,21 +3,24 @@
 
 program
 {
+
  struct mystruct{
   int i;
   string a = "stst";
  } s;
+
  struct nextstruct{
- int i;
- bool b = false;
+ int i = 0;
+ bool b = true;
  };
+
  int a = 51, b = hello, c;
  #undef hello
  string x = "abc", y, z = "hey";
  bool hello = true;
 
 
- c = (a + b) * 2; 
+ c = (a+b) * 2; 
  if ((c >= 100) or (b == c)) then {
 M:  c = a / b; // hello
  read (y);

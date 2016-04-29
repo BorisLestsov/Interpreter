@@ -46,7 +46,6 @@ class Parser{
 
     //semantics checks:
     void eq_bool();
-    void check_id_in_read();
     void check_id();
     void check_op();
     void check_not();
@@ -62,7 +61,4 @@ public:
 };
 
 //TODO: how to show wrong string of user's program?
-//TODO: Build Parser:
-//1) just procedures without semantic checks
-//2) with semantic checks
-//3) with poliz
+//TODO: Implement "for", "break", "goto" and also structure fields access: s.i = 5;

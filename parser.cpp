@@ -237,7 +237,7 @@ void Parser::OP(){
             if (c_type == LEX_LPAREN) {
                 get_lex();
                 if (c_type == LEX_ID) {
-                    check_id_in_read();
+                    check_id();
                     prog.push_back(Lex(RPN_ADDRESS, c_val));
                     get_lex();
                 }
@@ -420,27 +420,19 @@ void Parser::eq_bool() {
     lex_stack.pop();
 }
 
-void Parser::check_id_in_read() {
-    if ( !(ID_table[c_val].get_declared()) )
-        throw Exception("Parser error: use of undeclared ID in read: ", ID_table[c_val].get_name());
-}
-
 void Parser::check_id() {
     if ( !(ID_table[c_val].get_declared()) )
         throw Exception("Parser error: use of undeclared ID: ", ID_table[c_val].get_name());
 }
 
 void Parser::check_op() {
-    lex_t operand1, operand2, operation, t, result_type;
+    lex_t operand1, operand2, operation, result_type;
     operand2 = lex_stack.top();
     lex_stack.pop();
     operation = lex_stack.top();
     lex_stack.pop();
     operand1 = lex_stack.top();
     lex_stack.pop();
-
-    /*if (operand1 != operand2)
-        throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);*/
 
     if(operand1 == LEX_INT){
         if(operation == LEX_PLUS || operation == LEX_MINUS ||

@@ -98,7 +98,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        //cout << c << ' ' << STATE << endl;
+        cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -219,6 +219,8 @@ void Scanner::start() throw(exception){
                     ungetc(c,f);
                     STATE = NUMB_ST;
                 } else if(isalpha(c)){
+                    if(sign > 0) add_lex(LEX_PLUS, LEX_PLUS);
+                    else add_lex(LEX_MINUS, LEX_MINUS);
                     clear_buffer();
                     addc();
                     STATE = ID_ST;
