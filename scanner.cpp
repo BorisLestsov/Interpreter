@@ -98,7 +98,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        cout << c << ' ' << STATE << endl;
+        //cout << c << ' ' << STATE << endl;
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -238,7 +238,9 @@ void Scanner::start() throw(exception){
                         else if(c == 't') addc('\t');
                         else addc();
                     }else throw Exception("Scanner error: unknown literal: ", c);
-                } else if(c == '\"'){
+                } else if(c == '\"' || feof(f)){
+                    if(feof(f))
+                        throw Exception("Scanner error: unclosed string");
                     j = ID_table.append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
@@ -248,8 +250,9 @@ void Scanner::start() throw(exception){
                 if(com_type == '/') {
                     if (c == '\n')
                         STATE = H_ST;
-                } else if(c == '*'){
+                } else if(c == '*' || feof(f)){
                     gc();
+                    if(feof(f)) throw Exception("Scanner error: unclosed comment");
                     if(c == '/')
                         STATE = H_ST;
                 }

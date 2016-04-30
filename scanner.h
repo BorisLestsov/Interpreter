@@ -50,5 +50,3 @@ public:
     vector<Lex>& get_lex_vec();
     ID_table_t& get_ID_table();
 };
-
-//TODO: fix +NUM and -NUM

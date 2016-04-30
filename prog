@@ -22,10 +22,10 @@ program
 
  c = (a+b) * 2; ;
  if ((c >= 100) or (b == c)) then {
-M:  c = a / b; // hello
+M:  c = a / b; 			// hello
     read (y);
     write (y);
-    write (x + y + z, c);	//make write (x + y + z, c);
+    write (x + (y + z), c);
  } else
     c = a; //= 21;
  while (c > 100) do
@@ -36,5 +36,5 @@ M:  c = a / b; // hello
  //break;
  }
  goto M;
- write (x);
+ /*write (x);*/
 }
