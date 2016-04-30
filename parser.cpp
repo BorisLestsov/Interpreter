@@ -52,7 +52,7 @@ void Parser::DECLARATIONS() {
         STRUCT_DECL();
         get_lex();
     }
-
+    cout << "------------------------------" << endl;
     //get_lex();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         DECL();
@@ -200,20 +200,16 @@ void Parser::OP(){
             blank_pos2 = prog.get_pos ();
             prog.blank();
             prog.push_back(Lex(RPN_FGOTO));
-            if (c_type == LEX_THEN) {
+            OP();
+            blank_pos3 = prog.get_pos();
+            prog.blank();
+            prog.push_back(Lex(RPN_GOTO));
+            prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
+            if (c_type == LEX_ELSE) {
                 get_lex();
                 OP();
-                blank_pos3 = prog.get_pos();
-                prog.blank();
-                prog.push_back(Lex(RPN_GOTO));
-                prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
-                if (c_type == LEX_ELSE) {
-                    get_lex();
-                    OP();
-                    prog[blank_pos3] = Lex(RPN_LABEL,prog.get_pos());
-                }
-            } else
-                throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
+                prog[blank_pos3] = Lex(RPN_LABEL,prog.get_pos());
+            }
             break;
         case LEX_WHILE:
             blank_pos0 = prog.get_pos();
@@ -223,15 +219,10 @@ void Parser::OP(){
             blank_pos1 = prog.get_pos();
             prog.blank();
             prog.push_back(Lex(RPN_FGOTO));
-            if (c_type == LEX_DO) {
-                get_lex();
-                OP();
-                prog.push_back(Lex(RPN_LABEL, blank_pos0));
-                prog.push_back(Lex(RPN_GOTO));
-                prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
-            }
-            else
-                throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
+            OP();
+            prog.push_back(Lex(RPN_LABEL, blank_pos0));
+            prog.push_back(Lex(RPN_GOTO));
+            prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
             break;
         case LEX_READ:
             get_lex();
@@ -336,26 +327,25 @@ void Parser::OP(){
     }
 }
 
-void Parser::COMPLEX_OP(){
-    if ( c_type == LEX_BEGIN ) {
+void Parser::COMPLEX_OP() {
+    if (c_type == LEX_BEGIN) {
         do {
             get_lex();
-            if(c_type == LEX_END) break;
+            if (c_type == LEX_END) break;
             OP();
-        } while  ( c_type == LEX_SEMICOLON );
-        if ( c_type == LEX_END )
+        } while (c_type == LEX_SEMICOLON);
+        if (c_type == LEX_END)
             get_lex();
         else
             throw Exception("Parser error: expected \"}\" but recieved: ", Lex::lex_map[c_type]);
     }
-    else
-        throw Exception("Parser error: expected \"{\" but recieved: ", Lex::lex_map[c_type]);
+    else throw Exception("Parser error: expected \"{\" but recieved: ", Lex::lex_map[c_type]);
 }
-
 void Parser::EXPRESSION() {
     LOW();
-    if ( c_type == LEX_EQ || c_type == LEX_LSS || c_type == LEX_GTR ||
-         c_type == LEX_LEQ || c_type == LEX_GEQ || c_type == LEX_NEQ )
+    if ( /*c_type == LEX_EQ || c_type == LEX_LSS || c_type == LEX_GTR ||
+         c_type == LEX_LEQ || c_type == LEX_GEQ || c_type == LEX_NEQ*/
+            c_type == LEX_OR)
     {
         lex_stack.push (c_type);
         get_lex();
@@ -364,10 +354,25 @@ void Parser::EXPRESSION() {
     }
 }
 
-void Parser::LOW() {
+void Parser::LOW(){
+    MID();
+    if ( /*c_type == LEX_EQ || c_type == LEX_LSS || c_type == LEX_GTR ||
+         c_type == LEX_LEQ || c_type == LEX_GEQ || c_type == LEX_NEQ*/
+            c_type == LEX_AND)
+    {
+        lex_stack.push (c_type);
+        get_lex();
+        MID();
+        check_op();
+    }
+}
+
+void Parser::MID(){
     HIGH();
-    while ( c_type == LEX_PLUS || c_type == LEX_MINUS || c_type == LEX_OR ) {
-        lex_stack.push(c_type);
+    if (c_type == LEX_EQ || c_type == LEX_LSS || c_type == LEX_GTR ||
+         c_type == LEX_LEQ || c_type == LEX_GEQ || c_type == LEX_NEQ)
+    {
+        lex_stack.push (c_type);
         get_lex();
         HIGH();
         check_op();
@@ -375,8 +380,18 @@ void Parser::LOW() {
 }
 
 void Parser::HIGH() {
+    ULTRA_HIGH();
+    while ( c_type == LEX_PLUS || c_type == LEX_MINUS ) {
+        lex_stack.push(c_type);
+        get_lex();
+        ULTRA_HIGH();
+        check_op();
+    }
+}
+
+void Parser::ULTRA_HIGH() {
     F();
-    while ( c_type == LEX_TIMES || c_type == LEX_SLASH || c_type == LEX_AND ) {
+    while ( c_type == LEX_TIMES || c_type == LEX_SLASH) {
         lex_stack.push (c_type);
         get_lex();
         F();

@@ -37,7 +37,9 @@ class Parser{
     void OP();
     void COMPLEX_OP();
     void EXPRESSION();
+    void ULTRA_HIGH();
     void HIGH();
+    void MID();
     void LOW();
     void F();
 
