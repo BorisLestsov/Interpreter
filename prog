@@ -20,15 +20,14 @@ program
  bool hello = true;
 
 
- c = (a+b) * 2; 
+ c = (a+b) * 2; ;
  if ((c >= 100) or (b == c)) then {
 M:  c = a / b; // hello
- read (y);
- write (y);
- write (x + y + z);	//make write (x + y + z, c);
- }
- else
- c = a; //= 21;
+    read (y);
+    write (y);
+    write (x + y + z, c);	//make write (x + y + z, c);
+ } else
+    c = a; //= 21;
  while (c > 100) do
  {
  c = c - 5;
@@ -36,6 +35,6 @@ M:  c = a / b; // hello
  x = x + "step";
  //break;
  }
-//goto M;
+ goto M;
  write (x);
 }

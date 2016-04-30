@@ -53,8 +53,8 @@ enum lex_t {
     LEX_FIN,
     LEX_NUM,
     LEX_ID,
-    RPN_GO,
-    RPN_FGO,
+    RPN_GOTO,
+    RPN_FGOTO,
     RPN_LABEL,
     RPN_ADDRESS,
     __END_TBL

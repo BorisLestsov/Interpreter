@@ -60,5 +60,5 @@ public:
     void start();
 };
 
-//TODO: how to show wrong string of user's program?
+//TODO: how to show wrong string in user's program?
 //TODO: Implement "for", "break", "goto" and also structure fields access: s.i = 5;

@@ -190,6 +190,7 @@ void Parser::OPERATORS(){
 
 void Parser::OP(){
     int blank_pos0, blank_pos1, blank_pos2, blank_pos3;
+    int blank_goto;
 
     switch (c_type) {
         case LEX_IF:
@@ -198,13 +199,13 @@ void Parser::OP(){
             eq_bool();
             blank_pos2 = prog.get_pos ();
             prog.blank();
-            prog.push_back(Lex(RPN_FGO));
+            prog.push_back(Lex(RPN_FGOTO));
             if (c_type == LEX_THEN) {
                 get_lex();
                 OP();
                 blank_pos3 = prog.get_pos();
                 prog.blank();
-                prog.push_back(Lex(RPN_GO));
+                prog.push_back(Lex(RPN_GOTO));
                 prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
                 if (c_type == LEX_ELSE) {
                     get_lex();
@@ -221,12 +222,12 @@ void Parser::OP(){
             eq_bool();
             blank_pos1 = prog.get_pos();
             prog.blank();
-            prog.push_back(Lex(RPN_FGO));
+            prog.push_back(Lex(RPN_FGOTO));
             if (c_type == LEX_DO) {
                 get_lex();
                 OP();
                 prog.push_back(Lex(RPN_LABEL, blank_pos0));
-                prog.push_back(Lex(RPN_GO));
+                prog.push_back(Lex(RPN_GOTO));
                 prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
             }
             else
@@ -258,6 +259,11 @@ void Parser::OP(){
             if (c_type == LEX_LPAREN) {
                 get_lex();
                 EXPRESSION();
+                while(c_type == LEX_COMMA){
+                    prog.push_back(Lex(LEX_WRITE));
+                    get_lex();
+                    EXPRESSION();
+                }
                 if (c_type == LEX_RPAREN) {
                     get_lex();
                     prog.push_back(Lex(LEX_WRITE));
@@ -288,6 +294,7 @@ void Parser::OP(){
                         throw Exception("Parser error: multiple declaration of Label: ", ID_table[tmp_val].get_name());
                     ID_table[tmp_val].set_val(prog.get_pos());
                     ID_table[tmp_val].set_declared(true);
+                    ID_table[tmp_val].set_val(prog.get_pos());
                     c_type = LEX_SEMICOLON;
                     break;
                 default:
@@ -305,7 +312,18 @@ void Parser::OP(){
             get_lex();
             break;
         case LEX_GOTO:
-            throw Exception("Parser error: IN DEVELOPEMENT: ", Lex::lex_map[c_type]);
+            get_lex();
+            if(c_type != LEX_ID)
+                throw Exception("Parser error: expected Label: ", Lex::lex_map[c_type]);
+            if(ID_table[c_val].get_type() == LEX_LABEL){
+                prog.push_back(Lex(RPN_LABEL, ID_table[c_val].get_value()));
+                prog.push_back(Lex(RPN_GOTO));
+            } else throw Exception("Parser error: expected Label: ", Lex::lex_map[c_type]);
+            /*{
+                blank_goto = prog.get_pos();
+                prog.blank();
+                prog.push_back(Lex(RPN_GO));
+            } */
             get_lex();
             break;
         case LEX_FOR:
