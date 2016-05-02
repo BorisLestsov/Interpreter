@@ -54,6 +54,7 @@ class Parser{
     void check_assign();
 
     void get_lex();
+    void unget_lex();
     void make_tmp();
 public:
     RPN prog;

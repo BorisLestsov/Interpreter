@@ -32,7 +32,7 @@ public:
     void set_type(lex_t type_par);
     void set_declared(bool bool_par);
     void set_assigned(bool bool_par);
-    void set_val(int val_par);
+    void set_value(int val_par);
 };
 
 class ID_table_t {
@@ -44,4 +44,5 @@ public:
     ID& operator[] (int i);
     void print_table() const;
     bool multiple_declaration(int id) const;
+    void check_labels();
 };

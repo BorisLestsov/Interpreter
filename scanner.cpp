@@ -184,7 +184,7 @@ void Scanner::start() throw(exception){
                                 STRUCT_vec.push_back(ID_table_t());
                                 ++struct_index;
                                 //STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
-                                ID_table[j].set_val(struct_index);          // LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
+                                ID_table[j].set_value(struct_index);          // LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
                             } else if(struct_name_defined && struct_flag){              //TODO: Move string constants in struct from ID_table to struct_vec?
                                 j = STRUCT_vec[struct_index].append(buffer, LEX_ID);
                                 add_lex(LEX_ID, j);

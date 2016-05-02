@@ -53,14 +53,9 @@ void ID::set_assigned(bool bool_par){
     assigned = bool_par;
 }
 
-void ID::set_val(int val_par){
+void ID::set_value(int val_par){
     value = val_par;
 }
-
-/*
-string ID_table_t::get_name(int i) const{
-    return table[i].get_name();
-}*/
 
 int ID_table_t::append(const string &new_id, lex_t type_par, int value) {
     int i = 0;
@@ -125,4 +120,16 @@ ID& ID_table_t::operator[](int i) {
 
 bool ID_table_t::multiple_declaration(int i) const {
     return table[i].get_declared();
+}
+
+void ID_table_t::check_labels() {
+    vector<ID>::iterator ptr = table.begin();
+    vector<ID>::iterator end  = table.end();
+
+    while(ptr != end){
+        if(ptr->get_type() == LEX_LABEL && !ptr->get_assigned()){
+            throw Exception("Scanner error: undeclared Label in goto: ", ptr->get_name());
+        }
+        ++ptr;
+    }
 }
