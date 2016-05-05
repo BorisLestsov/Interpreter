@@ -35,6 +35,7 @@ G:
  c = s.i - 5;
  write (c);
  x = x + "step";
+ s.a="yo"+z;
  //break;
  }
  goto M;

@@ -258,7 +258,7 @@ void Parser::OP(){
                 get_lex();
                 if (c_type == LEX_ID) {
                     check_id();
-                    prog.push_back(Lex(RPN_ADDRESS, c_val));
+                    prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
                     get_lex();
                 }
                 else
@@ -300,7 +300,7 @@ void Parser::OP(){
                 case LEX_ASSIGN:
                     if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
-                    prog.push_back(Lex(RPN_ADDRESS, tmp_val));
+                    prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
                     lex_stack.push(ID_tables_vec[tmp_add_val][tmp_val].get_type());
                     get_lex();
                     EXPRESSION();
