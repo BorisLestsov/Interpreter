@@ -17,7 +17,6 @@ class Scanner{
     enum macro_t {MACRO_NULL, MACRO_DEFINE, MACRO_IFDEF, MACRO_IFNDEF, MACRO_ELSE,
         MACRO_ENDIF, MACRO_UNDEF, DEFINE_FINISHED, MACRO_SKIP};
     state_t STATE;
-    vector<Lex> lex_vec;
     FILE* f;
 
     char c;
@@ -38,15 +37,13 @@ class Scanner{
     inline void addc(char my_c);
     int look(const string buf, const string table[]);
 public:
-    static ID_table_t ID_table;
-    static vector<ID_table_t> STRUCT_vec;
+    vector<Lex> lex_vec;
+    static vector<ID_table_t> ID_tables_vec;
 
     Scanner(const char* input_f);
     Scanner();
     ~Scanner();
-    inline void add_lex(lex_t type_par, int val_par = 0);
+    inline void add_lex(lex_t type_par, int val_par = 0, int add_val_par = 0);
     void print_vec() const;
     void start() throw(exception);
-    vector<Lex>& get_lex_vec();
-    ID_table_t& get_ID_table();
 };

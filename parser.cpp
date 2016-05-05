@@ -4,10 +4,9 @@
 
 #include "parser.h"
 
-Parser::Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par, vector<ID_table_t>& STRUCT_vec_par):
+Parser::Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& ID_tables_vec_par):
         lex_vec(lex_vec_par),
-        ID_table(ID_table_par),
-        STRUCT_vec(STRUCT_vec_par)
+        ID_tables_vec(ID_tables_vec_par)
 {
     index = lex_vec.cbegin();
 }
@@ -16,6 +15,7 @@ void Parser::get_lex() {
     c_lex = *index;
     c_type = c_lex.get_type();
     c_val = c_lex.get_value();
+    c_add_val = c_lex.get_add_value();
     ++index;
     cout << c_lex << endl;
 }
@@ -34,6 +34,7 @@ void Parser::unget_lex() {
 void Parser::make_tmp() {
     tmp_type = c_type;
     tmp_val = c_val;
+    tmp_add_val = c_add_val;
 }
 
 
@@ -63,8 +64,15 @@ void Parser::DECLARATIONS() {
         STRUCT_DECL();
         get_lex();
     }
-    cout << "------------------------------" << endl;
+    //cout << "------------------------------" << endl;
     //get_lex();
+/*
+    cout << "--------TABLES--------" << endl;
+    int i;
+    for(i = 0; i < ID_tables_vec.size(); ++i){
+        ID_tables_vec[i].print_table();
+    }
+    cout << "------------------------------" << endl;*/
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         DECL();
         get_lex();
@@ -77,22 +85,22 @@ void Parser::STRUCT_DECL() {
 
     get_lex();
     if(c_type == LEX_ID) {
-        cur_struct_index = ID_table[c_val].get_value();
-    } else throw Exception("Parser error: expecded ID but recieved lexem: ", Lex::lex_map[c_type]);
+        cur_struct_index = ID_tables_vec[0][c_val].get_value();
+    } else throw Exception("Parser error: expected ID but recieved lexem: ", Lex::lex_map[c_type]);
     get_lex();
     if(c_type != LEX_BEGIN) throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
     get_lex();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
-        SWITCH_ID(STRUCT_vec[cur_struct_index]);
+        SWITCH_ID(ID_tables_vec[cur_struct_index]);
         get_lex();
     }
     if(c_type != LEX_END) throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
     get_lex();
     while(c_type != LEX_SEMICOLON){
         if(c_type == LEX_ID){
-            ID_table[c_val].set_type(LEX_STRUCT);
-            ID_table[c_val].set_value(cur_struct_index);
-            ID_table[c_val].set_declared(true);
+            ID_tables_vec[0][c_val].set_type(LEX_STRUCT);
+            ID_tables_vec[0][c_val].set_value(cur_struct_index);
+            ID_tables_vec[0][c_val].set_declared(true);
         } else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
         get_lex();
         if(c_type == LEX_COMMA)
@@ -188,7 +196,7 @@ void Parser::SWITCH_ID(ID_table_t& table) {
 }
 
 void Parser::DECL(){
-    SWITCH_ID(ID_table);
+    SWITCH_ID(ID_tables_vec[0]);
 }
 
 void Parser::OPERATORS(){
@@ -201,7 +209,7 @@ void Parser::OPERATORS(){
     get_lex();
     if (c_type != LEX_FIN)
         throw Exception("Parser error: expected LEX_FIN but recieved lexem: ", Lex::lex_map[c_type]);
-    ID_table.check_labels();
+    ID_tables_vec[0].check_labels();
     prog.push_back(Lex(LEX_FIN));
 }
 
@@ -287,33 +295,33 @@ void Parser::OP(){
             get_lex();
             switch (c_type) {
                 case LEX_ASSIGN:
-                    if ( !(ID_table[tmp_val].get_declared()) )
-                        throw Exception("Parser error: use of undeclared ID: ", ID_table[c_val].get_name());
+                    if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
+                        throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
                     prog.push_back(Lex(RPN_ADDRESS, tmp_val));
-                    lex_stack.push(ID_table[tmp_val].get_type());
+                    lex_stack.push(ID_tables_vec[tmp_add_val][tmp_val].get_type());
                     get_lex();
                     EXPRESSION();
                     check_assign();
                     prog.push_back(Lex(LEX_ASSIGN));
                     break;
                 case LEX_COLON:
-                    if(ID_table[tmp_val].get_type() == LEX_LABEL) {
+                    if(ID_tables_vec[0][tmp_val].get_type() == LEX_LABEL) {
                         //found previously in goto
-                        prog[ID_table[tmp_val].get_value()] = Lex(RPN_LABEL, prog.get_pos());
-                        ID_table[tmp_val].set_value(prog.get_pos() - 1);
-                        ID_table[tmp_val].set_assigned(true);
+                        prog[ID_tables_vec[0][tmp_val].get_value()] = Lex(RPN_LABEL, prog.get_pos());
+                        ID_tables_vec[0][tmp_val].set_value(prog.get_pos() - 1);
+                        ID_tables_vec[0][tmp_val].set_assigned(true);
                     } else {
                         if (tmp_type == LEX_INT || tmp_type == LEX_BOOL || tmp_type == LEX_STRING ||
                             tmp_type == LEX_STRC)
                             throw Exception("Parser error: attempt to use previously declared ID as Label: ",
-                                            ID_table[c_val].get_name());
-                        ID_table[tmp_val].set_type(LEX_LABEL);
-                        if (ID_table.multiple_declaration(tmp_val))
+                                            ID_tables_vec[0][c_val].get_name());
+                        ID_tables_vec[0][tmp_val].set_type(LEX_LABEL);
+                        if (ID_tables_vec[0].multiple_declaration(tmp_val))
                             throw Exception("Parser error: multiple declaration of Label: ",
-                                            ID_table[tmp_val].get_name());
-                        ID_table[tmp_val].set_value(prog.get_pos());
-                        ID_table[tmp_val].set_declared(true);
-                        ID_table[tmp_val].set_assigned(true);
+                                            ID_tables_vec[0][tmp_val].get_name());
+                        ID_tables_vec[0][tmp_val].set_value(prog.get_pos());
+                        ID_tables_vec[0][tmp_val].set_declared(true);
+                        ID_tables_vec[0][tmp_val].set_assigned(true);
                     }
                     c_type = LEX_SEMICOLON;
                     get_lex();
@@ -337,17 +345,17 @@ void Parser::OP(){
             get_lex();
             if(c_type != LEX_ID)
                 throw Exception("Parser error: expected Label: ", Lex::lex_map[c_type]);
-            if(ID_table[c_val].get_type() == LEX_LABEL){
-                prog.push_back(Lex(RPN_LABEL, ID_table[c_val].get_value()));
+            if(ID_tables_vec[0][c_val].get_type() == LEX_LABEL){
+                prog.push_back(Lex(RPN_LABEL, ID_tables_vec[0][c_val].get_value()));
                 prog.push_back(Lex(RPN_GOTO));
             } else {
-                tmp_type = ID_table[c_val].get_type();
+                tmp_type = ID_tables_vec[0][c_val].get_type();
                 if(tmp_type == LEX_INT || tmp_type == LEX_BOOL || tmp_type == LEX_STRING || tmp_type == LEX_STRC)
-                    throw Exception("Parser error: attempt to use previously declared ID as Label: ",  ID_table[c_val].get_name());
-                ID_table[c_val].set_type(LEX_LABEL);
-                ID_table[c_val].set_declared(true);
-                ID_table[c_val].set_assigned(false);
-                ID_table[c_val].set_value(prog.get_pos());
+                    throw Exception("Parser error: attempt to use previously declared ID as Label: ",  ID_tables_vec[0][c_val].get_name());
+                ID_tables_vec[0][c_val].set_type(LEX_LABEL);
+                ID_tables_vec[0][c_val].set_declared(true);
+                ID_tables_vec[0][c_val].set_assigned(false);
+                ID_tables_vec[0][c_val].set_value(prog.get_pos());
                 prog.blank();
                 prog.push_back(Lex(RPN_GOTO));
             }
@@ -461,7 +469,7 @@ void Parser::F ()
     switch (c_type){
         case LEX_ID:
             check_id();
-            lex_stack.push(ID_table[c_val].get_type());
+            lex_stack.push(ID_tables_vec[c_add_val][c_val].get_type());
             prog.push_back (Lex (LEX_ID, c_val));
             get_lex();
             break;
@@ -511,8 +519,8 @@ void Parser::eq_bool() {
 }
 
 void Parser::check_id() {
-    if ( !(ID_table[c_val].get_declared()) )
-        throw Exception("Parser error: use of undeclared ID: ", ID_table[c_val].get_name());
+    if ( !(ID_tables_vec[c_add_val][c_val].get_declared()) )
+        throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
 }
 
 void Parser::check_op() {

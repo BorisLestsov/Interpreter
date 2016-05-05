@@ -51,6 +51,7 @@ enum lex_t {
     LEX_FIN,
     LEX_NUM,
     LEX_ID,
+    LEX_DOT,
     RPN_GOTO,
     RPN_FGOTO,
     RPN_LABEL,

@@ -14,20 +14,18 @@ int main(int argc, char* argv[]){
 
         main_scanner.start();
         main_scanner.print_vec();
-        main_scanner.ID_table.print_table();
-        cout << "--------STRUCTURES--------" << endl;
+        cout << "--------TABLES--------" << endl;
         int i;
-        for(i = 0; i < main_scanner.STRUCT_vec.size(); ++i){
-            main_scanner.STRUCT_vec[i].print_table();
+        for(i = 0; i < main_scanner.ID_tables_vec.size(); ++i){
+            main_scanner.ID_tables_vec[i].print_table();
         }
 
         cout << "$$$$$$$$$$ PARSER $$$$$$$$$$$" << endl;
-        Parser main_parser(main_scanner.get_lex_vec(), main_scanner.ID_table, main_scanner.STRUCT_vec);
+        Parser main_parser(main_scanner.lex_vec, main_scanner.ID_tables_vec);
         main_parser.start();
-        main_scanner.ID_table.print_table();
-        cout << "--------STRUCTURES--------" << endl;
-        for(i = 0; i < main_scanner.STRUCT_vec.size(); ++i){
-            main_scanner.STRUCT_vec[i].print_table();
+        cout << "--------TABLES--------" << endl;
+        for(i = 0; i < main_scanner.ID_tables_vec.size(); ++i){
+            main_scanner.ID_tables_vec[i].print_table();
         }
         cout << "$$$$$$$$$$ PROG $$$$$$$$$$$" << endl;
         main_parser.prog.print();

@@ -133,3 +133,17 @@ void ID_table_t::check_labels() {
         ++ptr;
     }
 }
+
+int ID_table_t::find_pos(const string id_name) const {
+    vector<ID>::const_iterator ptr = table.cbegin();
+    vector<ID>::const_iterator end  = table.cend();
+    int i = 0;
+
+    while(ptr != end){
+        if(id_name == ptr->get_name())
+            return i;
+        ++ptr;
+        ++i;
+    }
+    return -1;
+}

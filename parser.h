@@ -17,15 +17,16 @@ using namespace std;
 
 class Parser{
     const vector<Lex>& lex_vec;
-    ID_table_t& ID_table;
     vector<Lex>::const_iterator index;
-    vector<ID_table_t>& STRUCT_vec;
+    vector<ID_table_t>& ID_tables_vec;
     stack<lex_t> lex_stack;
     Lex c_lex;
     lex_t c_type;
     int c_val;
+    int c_add_val;
     lex_t tmp_type;
     int tmp_val;
+    int tmp_add_val;
 
     //procedures:
     void PROGRAM();
@@ -59,9 +60,10 @@ class Parser{
 public:
     RPN prog;
 
-    Parser(const vector<Lex>& lex_vec_par, ID_table_t& ID_table_par, vector<ID_table_t>& STRUCT_vec_par);
+    Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& STRUCT_vec_par);
     void start();
 };
 
 //TODO: how to show wrong string in user's program?
-//TODO: Implement "for", "break", "goto" and also structure fields access: s.i = 5;
+//TODO: Implement "break"
+//TODO: check identical structure names

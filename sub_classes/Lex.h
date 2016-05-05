@@ -20,14 +20,16 @@ using namespace std;
 class Lex{
     lex_t type;
     int value;
+    int add_value;
 
 public:
     Lex();
-    Lex(lex_t type_par, int value_par = 0);
+    Lex(lex_t type_par, int value_par = 0, int add_value_par = 0);
     Lex(const Lex &);
     ~Lex();
     lex_t get_type() const;
     int get_value() const;
+    int get_add_value() const;
 
 
     friend ostream& operator<<(ostream& o, const Lex& lex_par);

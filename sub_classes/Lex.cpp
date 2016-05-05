@@ -4,10 +4,11 @@
 
 #include "Lex.h"
 
-Lex::Lex(): type(LEX_NULL) , value(0) {}
-Lex::Lex(lex_t type_par, int value_par):
-    type(type_par), value(value_par){}
-Lex::Lex(const Lex& lex_par): type(lex_par.type), value(lex_par.value){};
+Lex::Lex(): type(LEX_NULL) , value(0), add_value(0) {}
+Lex::Lex(lex_t type_par, int value_par, int add_value_par):
+    type(type_par),
+    value(value_par), add_value(add_value_par){}
+Lex::Lex(const Lex& lex_par): type(lex_par.type), value(lex_par.value), add_value(lex_par.add_value){};
 Lex::~Lex(){};
 
 lex_t Lex::get_type() const {
@@ -19,7 +20,7 @@ int Lex::get_value() const {
 }
 
 ostream& operator<<(ostream& o, const Lex& lex_par){
-    o << setw(15) << Lex::lex_map[lex_par.type] << setw(15) << lex_par.value;
+    o << setw(15) << Lex::lex_map[lex_par.type] << setw(15) << lex_par.value << setw(15) << lex_par.add_value;;
 }
 
 void operator++(lex_t& i ){
@@ -77,6 +78,7 @@ void Lex::construct_lex_map(){
             "LEX_FIN",
             "LEX_NUM",
             "LEX_ID",
+            "LEX_DOT",
             "RPN_GO",
             "RPN_FGO",
             "RPN_LABEL",
@@ -88,4 +90,8 @@ void Lex::construct_lex_map(){
         lex_map.insert(make_pair(i , debug[i]));
     }
     lex_map.insert(make_pair(i, debug[i]));
+}
+
+int Lex::get_add_value() const {
+    return add_value;
 }

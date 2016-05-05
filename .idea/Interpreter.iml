@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Virtual_Machine.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Virtual_Machine.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/interpreter_app.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/parser.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/parser.h" isTestSource="false" />

@@ -40,6 +40,7 @@ class ID_table_t {
 public:
     int append(const string& new_id, lex_t type_par, int value = 0);
     const ID* find(const string id_name) const;
+    int find_pos(const string id_name) const;
     void erase(const string& name);
     ID& operator[] (int i);
     void print_table() const;

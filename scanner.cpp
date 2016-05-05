@@ -9,9 +9,8 @@
 
 using namespace std;
 
-ID_table_t Scanner::ID_table;
 ID_table_t Scanner::m_table;
-vector<ID_table_t> Scanner::STRUCT_vec;
+vector<ID_table_t> Scanner::ID_tables_vec(1);
 
 Scanner::Scanner(): lex_vec(0, Lex()) {
     clear_buffer();
@@ -29,14 +28,6 @@ Scanner::~Scanner(){
     fclose(f);
 }
 
-vector<Lex>& Scanner::get_lex_vec() {
-    return lex_vec;
-}
-
-ID_table_t& Scanner::get_ID_table() {
-    return ID_table;
-}
-
 
 inline void Scanner::gc(){
     c = (char) fgetc(f);
@@ -50,8 +41,8 @@ inline void Scanner::addc(char my_c){
     buffer += my_c;
 }
 
-void Scanner::add_lex(lex_t type_par, int val_par){
-    lex_vec.push_back(Lex(type_par, val_par));
+void Scanner::add_lex(lex_t type_par, int val_par, int add_val_par){
+    lex_vec.push_back(Lex(type_par, val_par, add_val_par));
 }
 
 void Scanner::print_vec() const{
@@ -61,7 +52,7 @@ void Scanner::print_vec() const{
     ptr = lex_vec.cbegin();
     while(ptr != lex_vec.cend()){
         //cout << *ptr << endl;
-        cout << setw(15) << Lex::lex_map[ptr->get_type()] << setw(15) << ptr->get_value() << endl;
+        cout << *ptr << endl;
         ptr++;
     }
 }
@@ -86,7 +77,8 @@ void Scanner::start() throw(exception){
 
     bool struct_name_defined = false;
     bool struct_flag = false;
-    int struct_index = -1;
+    bool struct_names = false;
+    int struct_index = 0;
 
     bool started = false;
     int M_STATE = MACRO_NULL;
@@ -98,7 +90,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        //cout << c << ' ' << STATE << endl;
+        //cout << c << ' ';
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -179,18 +171,36 @@ void Scanner::start() throw(exception){
                         if(ID_ptr == NULL){
                             if(!struct_name_defined && struct_flag){
                                 struct_name_defined = true;
-                                j = ID_table.append(buffer, LEX_STRUCT_T);
+                                j = ID_tables_vec[0].append(buffer, LEX_STRUCT_T);
                                 add_lex(LEX_ID, j);
-                                STRUCT_vec.push_back(ID_table_t());
+                                ID_tables_vec.push_back(ID_table_t());
                                 ++struct_index;
-                                //STRUCT_vec[struct_index].append(buffer, LEX_STRUCT_T); //TODO: Do I need it?
-                                ID_table[j].set_value(struct_index);          // LEX_STRUCT_T's value in ID_table is this structure's position in struct_vec
-                            } else if(struct_name_defined && struct_flag){              //TODO: Move string constants in struct from ID_table to struct_vec?
-                                j = STRUCT_vec[struct_index].append(buffer, LEX_ID);
+                                ID_tables_vec[0][j].set_value(struct_index);          // LEX_STRUCT_T's value in ID_tables_vec[0] is this structure's position in struct_vec
+                            } else if(struct_name_defined && struct_flag){
+                                j = ID_tables_vec[struct_index].append(buffer, LEX_ID);
                                 add_lex(LEX_ID, j);
+                            } else if (struct_names){
+                                j = ID_tables_vec[0].append(buffer, LEX_STRUCT);
+                                ID_tables_vec[0][j].set_value(struct_index);
+                                add_lex(LEX_ID, j, struct_index);
                             } else {
-                                j = ID_table.append(buffer, LEX_ID);
-                                add_lex(LEX_ID, j);
+                                if(lex_vec.back().get_type() == LEX_DOT){
+                                    lex_vec.pop_back();
+                                    if(lex_vec.back().get_type() != LEX_ID)
+                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                    if(ID_tables_vec[0][lex_vec.back().get_value()].get_type() != LEX_STRUCT)
+                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                    Lex tmp_lex = lex_vec.back();
+                                    lex_vec.pop_back();
+                                    j = ID_tables_vec[ID_tables_vec[0][tmp_lex.get_value()].get_value()].find_pos(buffer);
+                                    if(j >= 0)
+                                        add_lex(LEX_ID, j, ID_tables_vec[0][tmp_lex.get_value()].get_value());
+                                    else throw Exception("Scanner error: unknown field in struct: ",
+                                                         ID_tables_vec[0][tmp_lex.get_value()].get_name());
+                                } else {
+                                    j = ID_tables_vec[0].append(buffer, LEX_ID);
+                                    add_lex(LEX_ID, j);
+                                }
                             }
                         } else {
                             add_lex(LEX_NUM, ID_ptr->get_value());
@@ -241,7 +251,10 @@ void Scanner::start() throw(exception){
                 } else if(c == '\"' || feof(f)){
                     if(feof(f))
                         throw Exception("Scanner error: unclosed string");
-                    j = ID_table.append(buffer, LEX_STRC);
+                    if(!struct_flag)
+                        j = ID_tables_vec[0].append(buffer, LEX_STRC);
+                    else
+                        j = ID_tables_vec[struct_index].append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
                     STATE = H_ST;
                 } else addc();
@@ -293,7 +306,9 @@ void Scanner::start() throw(exception){
                     if(struct_flag && j == 2){
                         struct_flag = false;
                         struct_name_defined = false;
-                    }
+                        struct_names = true;
+                    } else if(struct_names && !(j == 4))
+                        struct_names = false;
                     add_lex(DEL_LEXEMS[j], j);
                     ungetc(c, f);
                 } else {
@@ -494,6 +509,7 @@ const string Scanner::DEL_NAMES[] = {
         "<=",
         "!=",
         ">=",
+        ".",
         TBL_END
 };
 
@@ -554,5 +570,6 @@ const lex_t Scanner::DEL_LEXEMS[] = {
         LEX_LEQ,
         LEX_NEQ,
         LEX_GEQ,
+        LEX_DOT,
         LEX_NULL
 };
