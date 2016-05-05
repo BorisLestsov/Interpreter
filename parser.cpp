@@ -81,11 +81,14 @@ void Parser::DECLARATIONS() {
 
 void Parser::STRUCT_DECL() {
     int cur_struct_index;
-    ID* ID_ptr;
 
     get_lex();
     if(c_type == LEX_ID) {
         cur_struct_index = ID_tables_vec[0][c_val].get_value();
+        if(ID_tables_vec[0][c_val].get_declared())
+            throw Exception("Parser error: multiple declaration of structure: ",
+                            ID_tables_vec[0][c_val].get_name());
+        ID_tables_vec[0][c_val].set_declared(true);
     } else throw Exception("Parser error: expected ID but recieved lexem: ", Lex::lex_map[c_type]);
     get_lex();
     if(c_type != LEX_BEGIN) throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
