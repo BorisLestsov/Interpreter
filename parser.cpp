@@ -473,7 +473,7 @@ void Parser::F ()
         case LEX_ID:
             check_id();
             lex_stack.push(ID_tables_vec[c_add_val][c_val].get_type());
-            prog.push_back (Lex (LEX_ID, c_val));
+            prog.push_back (Lex (LEX_ID, c_val, c_add_val));
             get_lex();
             break;
         case LEX_NUM:

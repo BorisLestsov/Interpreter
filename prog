@@ -32,7 +32,7 @@ G:
  goto G;
  while (c > 100)
  {
- c = c - 5;
+ c = s.i - 5;
  write (c);
  x = x + "step";
  //break;
