@@ -50,7 +50,6 @@ void Parser::DECLARATIONS() {
     get_lex();
     if(c_type != LEX_BEGIN)
         throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
-    //push { to stack?
 
     get_lex();
     while(c_type == LEX_STRUCT) {
@@ -353,7 +352,7 @@ void Parser::OP(){
             get_lex();
             switch (c_type) {
                 case LEX_ASSIGN:
-                    if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
+                    if (!(ID_tables_vec[tmp_add_val][tmp_val].get_declared()))
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
                     if(tmp_add_val != 0)
                         prog.push_back(Lex(RPN_ADDRESS, tmp_val, ID_tables_vec[0][tmp_add_val].get_value()));
@@ -625,7 +624,7 @@ void Parser::check_assign() {
     if(op1.get_type() == LEX_STRUCT_T)
         throw Exception("Parser error: structure type in assign");
     if(op1.get_type() == LEX_STRUCT)
-        if(op1.get_value() != op2.get_value())
+        if(ID_tables_vec[op1.get_value()][0].get_value() != ID_tables_vec[op2.get_value()][0].get_value())
             throw Exception("Parser error: assignment of structures of diffrent types");
 
 }

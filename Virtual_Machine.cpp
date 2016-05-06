@@ -84,6 +84,7 @@ int Virtual_Machine::start() {
                         [arg1_lex.get_value()].get_value()].set_name(tmp_str);
                         break;
                     case LEX_STRUCT:
+
                         break;
 
                 }

@@ -176,6 +176,10 @@ void Scanner::start() throw(exception){
                                 add_lex(LEX_ID, j);
                                 ID_tables_vec.push_back(ID_table_t());
                                 ++struct_index;
+
+                                ID_tables_vec[struct_index].append(buffer, LEX_STRUCT_T);
+                                ID_tables_vec[struct_index][0].set_value(j);
+
                                 ID_tables_vec[0][j].set_value(struct_index);          // LEX_STRUCT_T's value in ID_tables_vec[0] is this structure's position in struct_vec
                             } else if(struct_name_defined && struct_flag){
                                 j = ID_tables_vec[struct_index].append(buffer, LEX_ID);
