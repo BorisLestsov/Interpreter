@@ -3,17 +3,19 @@
 //
 #include "Scanner.h"
 #include "Parser.h"
+#include "Virtual_Machine.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]){
     try {
         if(argc < 2) throw Exception("Interpreter error: no file");
+
         Scanner main_scanner(argv[1]);
         Lex::construct_lex_map();
 
         main_scanner.start();
-        main_scanner.print_vec();
+        //main_scanner.print_vec();
         cout << "--------TABLES--------" << endl;
         int i;
         for(i = 0; i < main_scanner.ID_tables_vec.size(); ++i){
@@ -29,10 +31,14 @@ int main(int argc, char* argv[]){
         }
         cout << "$$$$$$$$$$ PROG $$$$$$$$$$$" << endl;
         main_parser.prog.print();
+
+        cout << "$$$$$$$$$$ VIRTUAL MACHINE $$$$$$$$$$$" << endl;
+        Virtual_Machine VM(main_parser.prog, main_parser.ID_tables_vec);
+        VM.start();
     }
     catch (exception& ex){
         cout << ex.what() << endl;
-        return -5;
+        return -1;
     }
     return 0;
 }

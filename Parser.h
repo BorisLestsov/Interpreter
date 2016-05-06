@@ -19,8 +19,6 @@ class Parser{
     const vector<Lex>& lex_vec;
     vector<Lex>::const_iterator index;
 
-    vector<ID_table_t>& ID_tables_vec;
-
     stack<int> break_stack;
 
     stack<Lex> lex_stack;
@@ -58,10 +56,12 @@ class Parser{
     void check_not();
     void check_assign();
 
-    void get_lex();
-    void unget_lex();
-    void make_tmp();
+    inline void get_lex();
+    inline void unget_lex();
+    inline void make_tmp();
+    void struct_init();
 public:
+    vector<ID_table_t>& ID_tables_vec;
     RPN prog;
 
     Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& STRUCT_vec_par);

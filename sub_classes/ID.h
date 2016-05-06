@@ -36,8 +36,9 @@ public:
 };
 
 class ID_table_t {
-    vector<ID> table;
 public:
+    vector<ID> table;
+
     int append(const string& new_id, lex_t type_par, int value = 0);
     const ID* find(const string id_name) const;
     int find_pos(const string id_name) const;

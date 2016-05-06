@@ -17,17 +17,13 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    cout << c_lex << endl;
+    //cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
     --index;
     --index;
     get_lex();
-    /*c_lex = *index;
-    c_type = c_lex.get_type();
-    c_val = c_lex.get_value();
-    cout << "unget " << c_lex << endl;*/
 }
 
 void Parser::make_tmp() {
@@ -54,13 +50,13 @@ void Parser::DECLARATIONS() {
     get_lex();
     if(c_type != LEX_BEGIN)
         throw Exception("Parser error: expected { but recieved lexem: ", Lex::lex_map[c_type]);
-    //push { to stack?
 
     get_lex();
     while(c_type == LEX_STRUCT) {
         STRUCT_DECL();
         get_lex();
     }
+    struct_init();
     //cout << "------------------------------" << endl;
 /*
     cout << "--------TABLES--------" << endl;
@@ -307,8 +303,16 @@ void Parser::OP(){
             if (c_type == LEX_LPAREN) {
                 get_lex();
                 if (c_type == LEX_ID) {
+                    if(ID_tables_vec[c_add_val][c_val].get_type() != LEX_INT &&
+                            ID_tables_vec[c_add_val][c_val].get_type() != LEX_BOOL &&
+                            ID_tables_vec[c_add_val][c_val].get_type() != LEX_STRING)
+                        throw Exception("Parser error: expected int, bool or string to read, but recieved : ",
+                                        ID_tables_vec[c_add_val][c_val].get_type());
                     check_id();
-                    prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
+                    if(c_add_val != 0)
+                        prog.push_back(Lex(RPN_ADDRESS, c_val, ID_tables_vec[0][c_add_val].get_value()));
+                    else
+                        prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
                     get_lex();
                 }
                 else
@@ -348,9 +352,12 @@ void Parser::OP(){
             get_lex();
             switch (c_type) {
                 case LEX_ASSIGN:
-                    if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
+                    if (!(ID_tables_vec[tmp_add_val][tmp_val].get_declared()))
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
-                    prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
+                    if(tmp_add_val != 0)
+                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, ID_tables_vec[0][tmp_add_val].get_value()));
+                    else
+                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
                     lex_stack.push(Lex(ID_tables_vec[tmp_add_val][tmp_val].get_type(),
                                        ID_tables_vec[tmp_add_val][tmp_val].get_value()));
                                 //Lex:  type    ID type in tables
@@ -501,7 +508,10 @@ void Parser::F ()
             check_id();
             lex_stack.push(Lex(ID_tables_vec[c_add_val][c_val].get_type(),
                            ID_tables_vec[c_add_val][c_val].get_value()));
-            prog.push_back (Lex (LEX_ID, c_val, c_add_val));
+            if(c_add_val != 0)
+                prog.push_back (Lex (LEX_ID, c_val, ID_tables_vec[0][c_add_val].get_value()));
+            else
+                prog.push_back (Lex (LEX_ID, c_val, 0));
             get_lex();
             break;
         case LEX_NUM:
@@ -582,8 +592,9 @@ void Parser::check_op() {
     } else if(operand1 == LEX_STRING || operand1 == LEX_STRC){
         if(operation == LEX_PLUS){
             result_type = LEX_STRING;
-        } else if(operation == LEX_EQ || operation == LEX_NEQ ){
-            result_type = LEX_STRING;
+        } else if(operation == LEX_EQ || operation == LEX_LSS || operation == LEX_GTR ||
+                  operation == LEX_LEQ || operation == LEX_GEQ || operation == LEX_NEQ){
+            result_type = LEX_BOOL;
         } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
         if (operand2 != LEX_STRING && operand2 != LEX_STRC)
             throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
@@ -609,12 +620,31 @@ void Parser::check_assign() {
     lex_stack.pop();
     Lex op2 = lex_stack.top();
     lex_stack.pop();
-    if ( op1.get_type() != op2.get_type() )
+    if(op2.get_type() != LEX_STRING){
+        if ( op1.get_type() != op2.get_type() )
+            throw Exception("Parser error: wrong types in assign");
+    } else if(op1.get_type() != LEX_STRING && op1.get_type() != LEX_STRC)
         throw Exception("Parser error: wrong types in assign");
     if(op1.get_type() == LEX_STRUCT_T)
         throw Exception("Parser error: structure type in assign");
     if(op1.get_type() == LEX_STRUCT)
-        if(op1.get_value() != op2.get_value())
+        if(ID_tables_vec[op1.get_value()][0].get_value() != ID_tables_vec[op2.get_value()][0].get_value())
             throw Exception("Parser error: assignment of structures of diffrent types");
+
+}
+
+void Parser::struct_init() {
+    auto ptr = ID_tables_vec[0].table.begin();
+    auto end = ID_tables_vec[0].table.end();
+    int table_index;
+
+    while(ptr != end){
+        if(ptr->get_type() == LEX_STRUCT){
+            table_index = (int) ID_tables_vec.size();
+            ID_tables_vec.push_back(ID_tables_vec[ptr->get_value()]);
+            ptr->set_value(table_index);
+        }
+        ++ptr;
+    }
 
 }

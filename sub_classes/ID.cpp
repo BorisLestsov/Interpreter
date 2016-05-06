@@ -57,6 +57,7 @@ void ID::set_value(int val_par){
     value = val_par;
 }
 
+
 int ID_table_t::append(const string &new_id, lex_t type_par, int value) {
     int i = 0;
     vector<ID>::const_iterator ptr = table.cbegin();

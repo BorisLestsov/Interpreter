@@ -10,7 +10,7 @@ void RPN::print() const{
     int i = 0;
 
     while(ptr != end){
-        cout <<setw(2) << i++  << *ptr << endl;
+        cout << setw(2) << i++  << *ptr << endl;
         ++ptr;
     }
 }

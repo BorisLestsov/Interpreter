@@ -122,6 +122,7 @@ void Scanner::start() throw(exception){
                         com_type = '*';
                     } else {
                         add_lex(LEX_SLASH, LEX_SLASH);
+                        ungetc(c,f);
                         STATE = H_ST;
                     }
                 } else if (c == '!') {
@@ -175,6 +176,10 @@ void Scanner::start() throw(exception){
                                 add_lex(LEX_ID, j);
                                 ID_tables_vec.push_back(ID_table_t());
                                 ++struct_index;
+
+                                ID_tables_vec[struct_index].append(buffer, LEX_STRUCT_T);
+                                ID_tables_vec[struct_index][0].set_value(j);
+
                                 ID_tables_vec[0][j].set_value(struct_index);          // LEX_STRUCT_T's value in ID_tables_vec[0] is this structure's position in struct_vec
                             } else if(struct_name_defined && struct_flag){
                                 j = ID_tables_vec[struct_index].append(buffer, LEX_ID);
@@ -187,14 +192,14 @@ void Scanner::start() throw(exception){
                                 if(lex_vec.back().get_type() == LEX_DOT){
                                     lex_vec.pop_back();
                                     if(lex_vec.back().get_type() != LEX_ID)
-                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                        throw Exception("Scanner error: expected struct name before: ", buffer);
                                     if(ID_tables_vec[0][lex_vec.back().get_value()].get_type() != LEX_STRUCT)
-                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                        throw Exception("Scanner error: expected struct name before: ", buffer);
                                     Lex tmp_lex = lex_vec.back();
                                     lex_vec.pop_back();
                                     j = ID_tables_vec[ID_tables_vec[0][tmp_lex.get_value()].get_value()].find_pos(buffer);
                                     if(j >= 0)
-                                        add_lex(LEX_ID, j, ID_tables_vec[0][tmp_lex.get_value()].get_value());
+                                        add_lex(LEX_ID, j, tmp_lex.get_value());
                                     else throw Exception("Scanner error: unknown field in struct: ",
                                                          ID_tables_vec[0][tmp_lex.get_value()].get_name());
                                 } else {
