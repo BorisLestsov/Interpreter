@@ -2,7 +2,7 @@
 // Created by Boris on 10.04.2016.
 //
 
-#include "parser.h"
+#include "parser1.h"
 
 Parser::Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& ID_tables_vec_par):
         lex_vec(lex_vec_par),
@@ -30,13 +30,11 @@ void Parser::unget_lex() {
     cout << "unget " << c_lex << endl;*/
 }
 
-
 void Parser::make_tmp() {
     tmp_type = c_type;
     tmp_val = c_val;
     tmp_add_val = c_add_val;
 }
-
 
 void Parser::start() {
     PROGRAM();
@@ -50,7 +48,6 @@ void Parser::PROGRAM(){
     OPERATORS();
     /*if(c_type != LEX_FIN)
         throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);*/
-
 }
 
 void Parser::DECLARATIONS() {
@@ -214,10 +211,13 @@ void Parser::OPERATORS(){
         throw Exception("Parser error: expected LEX_FIN but recieved lexem: ", Lex::lex_map[c_type]);
     ID_tables_vec[0].check_labels();
     prog.push_back(Lex(LEX_FIN));
+    if(!break_stack.empty())
+        throw Exception("Parser error: \"break\" outside of loop");
 }
 
 void Parser::OP(){
     int blank_pos0, blank_pos1, blank_pos2, blank_pos3;
+    int break_pos;
 
     switch (c_type) {
         case LEX_IF:
@@ -240,6 +240,8 @@ void Parser::OP(){
             } else { unget_lex();}
             break;
         case LEX_WHILE:
+            break_stack.push(-1);
+
             blank_pos0 = prog.get_pos();
             get_lex();
             EXPRESSION();
@@ -251,6 +253,54 @@ void Parser::OP(){
             prog.push_back(Lex(RPN_LABEL, blank_pos0));
             prog.push_back(Lex(RPN_GOTO));
             prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
+
+            break_pos = break_stack.top();
+            break_stack.pop();
+            while(break_pos != -1){
+                prog[break_pos] = Lex(RPN_LABEL, prog.get_pos());
+                break_pos = break_stack.top();
+                break_stack.pop();
+            }
+            break;
+        case LEX_FOR:
+            break_stack.push(-1);
+
+            get_lex();
+            if(c_type != LEX_LPAREN)
+                throw Exception("Parser error: expected \"(\": ", Lex::lex_map[c_type]);
+            get_lex();
+            OP();
+            blank_pos0 = prog.get_pos();
+            get_lex();
+            EXPRESSION();
+            get_lex();
+            eq_bool();
+            blank_pos1 = prog.get_pos();
+            prog.blank();
+            prog.push_back(Lex(RPN_FGOTO));
+            blank_pos2 = prog.get_pos();
+            prog.blank();
+            prog.push_back(Lex(RPN_GOTO));
+            blank_pos3 = prog.get_pos();
+            OP();
+            prog.push_back(Lex(RPN_LABEL, blank_pos0));
+            prog.push_back(Lex(RPN_GOTO));
+            prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
+            if(c_type != LEX_RPAREN)
+                throw Exception("Parser error: expected \")\": ", Lex::lex_map[c_type]);
+            get_lex();
+            OP();
+            prog.push_back(Lex(RPN_LABEL, blank_pos3));
+            prog.push_back(Lex(RPN_GOTO));
+            prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
+
+            break_pos = break_stack.top();
+            break_stack.pop();
+            while(break_pos != -1){
+                prog[break_pos] = Lex(RPN_LABEL, prog.get_pos());
+                break_pos = break_stack.top();
+                break_stack.pop();
+            }
             break;
         case LEX_READ:
             get_lex();
@@ -370,36 +420,6 @@ void Parser::OP(){
                 prog.push_back(Lex(RPN_GOTO));
             }
             get_lex();
-            break;
-        case LEX_FOR:
-            get_lex();
-            if(c_type != LEX_LPAREN)
-                throw Exception("Parser error: expected \"(\": ", Lex::lex_map[c_type]);
-            get_lex();
-            OP();
-            blank_pos0 = prog.get_pos();
-            get_lex();
-            EXPRESSION();
-            get_lex();
-            eq_bool();
-            blank_pos1 = prog.get_pos();
-            prog.blank();
-            prog.push_back(Lex(RPN_FGOTO));
-            blank_pos2 = prog.get_pos();
-            prog.blank();
-            prog.push_back(Lex(RPN_GOTO));
-            blank_pos3 = prog.get_pos();
-            OP();
-            prog.push_back(Lex(RPN_LABEL, blank_pos0));
-            prog.push_back(Lex(RPN_GOTO));
-            prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
-            if(c_type != LEX_RPAREN)
-                throw Exception("Parser error: expected \")\": ", Lex::lex_map[c_type]);
-            get_lex();
-            OP();
-            prog.push_back(Lex(RPN_LABEL, blank_pos3));
-            prog.push_back(Lex(RPN_GOTO));
-            prog[blank_pos1] = Lex(RPN_LABEL, prog.get_pos());
             break;
         default:
             throw Exception("Parser error: Unknown operator: ", Lex::lex_map[c_type]);

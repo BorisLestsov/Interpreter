@@ -6,10 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/Virtual_Machine.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Virtual_Machine.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/interpreter_app.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/parser.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/parser.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/scanner.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/scanner.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/parser1.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/parser1.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scanner1.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scanner1.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/Exception.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/Exception.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/ID.cpp" isTestSource="false" />

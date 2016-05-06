@@ -18,9 +18,12 @@ using namespace std;
 class Parser{
     const vector<Lex>& lex_vec;
     vector<Lex>::const_iterator index;
+
     vector<ID_table_t>& ID_tables_vec;
-    stack<Lex> lex_stack;
+
     stack<int> break_stack;
+
+    stack<Lex> lex_stack;
     Lex c_lex;
     lex_t c_type;
     int c_val;
