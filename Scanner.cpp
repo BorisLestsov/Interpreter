@@ -188,14 +188,14 @@ void Scanner::start() throw(exception){
                                 if(lex_vec.back().get_type() == LEX_DOT){
                                     lex_vec.pop_back();
                                     if(lex_vec.back().get_type() != LEX_ID)
-                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                        throw Exception("Scanner error: expected struct name before: ", buffer);
                                     if(ID_tables_vec[0][lex_vec.back().get_value()].get_type() != LEX_STRUCT)
-                                        throw Exception("Scanner error: expected struct before: ", buffer);
+                                        throw Exception("Scanner error: expected struct name before: ", buffer);
                                     Lex tmp_lex = lex_vec.back();
                                     lex_vec.pop_back();
                                     j = ID_tables_vec[ID_tables_vec[0][tmp_lex.get_value()].get_value()].find_pos(buffer);
                                     if(j >= 0)
-                                        add_lex(LEX_ID, j, ID_tables_vec[0][tmp_lex.get_value()].get_value());
+                                        add_lex(LEX_ID, j, tmp_lex.get_value());
                                     else throw Exception("Scanner error: unknown field in struct: ",
                                                          ID_tables_vec[0][tmp_lex.get_value()].get_name());
                                 } else {

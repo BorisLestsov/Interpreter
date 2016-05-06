@@ -14,8 +14,6 @@
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/Exception.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/ID.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/ID.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/sub_classes/Int_Pair.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/sub_classes/Int_Pair.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/Lex.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/Lex.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sub_classes/RPN.cpp" isTestSource="false" />
@@ -40,17 +38,15 @@
           <root url="file:///usr/local/include" />
         </SOURCES>
         <excluded>
-          <root url="file://$MODULE_DIR$/sub_classes/Exception.h" />
+          <root url="file://$MODULE_DIR$/sub_classes/Exception.cpp" />
           <root url="file://$MODULE_DIR$/sub_classes/Lex.cpp" />
           <root url="file://$MODULE_DIR$/sub_classes/Lex.h" />
-          <root url="file://$MODULE_DIR$/sub_classes/Int_Pair.h" />
           <root url="file://$MODULE_DIR$/sub_classes/ID.cpp" />
           <root url="file://$MODULE_DIR$/sub_classes/ID.h" />
-          <root url="file://$MODULE_DIR$/sub_classes/RPN.h" />
+          <root url="file://$MODULE_DIR$/sub_classes/Exception.h" />
           <root url="file://$MODULE_DIR$/sub_classes/lex_t.h" />
-          <root url="file://$MODULE_DIR$/sub_classes/Exception.cpp" />
           <root url="file://$MODULE_DIR$/sub_classes/RPN.cpp" />
-          <root url="file://$MODULE_DIR$/sub_classes/Int_Pair.cpp" />
+          <root url="file://$MODULE_DIR$/sub_classes/RPN.h" />
         </excluded>
       </library>
     </orderEntry>

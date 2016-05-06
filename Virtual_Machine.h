@@ -16,6 +16,7 @@ class Virtual_Machine {
     Lex arg1_lex;
     Lex arg2_lex;
     string tmp_str;
+    int tmp1, tmp2;
 
     inline void get_cmd();
     inline bool prog_finished() const;
@@ -26,3 +27,5 @@ public:
 
     int start();
 };
+
+//TODO: add struct assignment

@@ -59,6 +59,7 @@ class Parser{
     inline void get_lex();
     inline void unget_lex();
     inline void make_tmp();
+    void struct_init();
 public:
     vector<ID_table_t>& ID_tables_vec;
     RPN prog;
