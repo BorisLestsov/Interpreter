@@ -310,7 +310,10 @@ void Parser::OP(){
                         throw Exception("Parser error: expected int, bool or string to read, but recieved : ",
                                         ID_tables_vec[c_add_val][c_val].get_type());
                     check_id();
-                    prog.push_back(Lex(RPN_ADDRESS, c_val, ID_tables_vec[0][c_add_val].get_value()));
+                    if(c_add_val != 0)
+                        prog.push_back(Lex(RPN_ADDRESS, c_val, ID_tables_vec[0][c_add_val].get_value()));
+                    else
+                        prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
                     get_lex();
                 }
                 else
@@ -352,7 +355,10 @@ void Parser::OP(){
                 case LEX_ASSIGN:
                     if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
-                    prog.push_back(Lex(RPN_ADDRESS, tmp_val, ID_tables_vec[0][tmp_add_val].get_value()));
+                    if(tmp_add_val != 0)
+                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, ID_tables_vec[0][tmp_add_val].get_value()));
+                    else
+                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
                     lex_stack.push(Lex(ID_tables_vec[tmp_add_val][tmp_val].get_type(),
                                        ID_tables_vec[tmp_add_val][tmp_val].get_value()));
                                 //Lex:  type    ID type in tables
@@ -503,7 +509,10 @@ void Parser::F ()
             check_id();
             lex_stack.push(Lex(ID_tables_vec[c_add_val][c_val].get_type(),
                            ID_tables_vec[c_add_val][c_val].get_value()));
-            prog.push_back (Lex (LEX_ID, c_val, ID_tables_vec[0][c_add_val].get_value()));
+            if(c_add_val != 0)
+                prog.push_back (Lex (LEX_ID, c_val, ID_tables_vec[0][c_add_val].get_value()));
+            else
+                prog.push_back (Lex (LEX_ID, c_val, 0));
             get_lex();
             break;
         case LEX_NUM:

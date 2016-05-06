@@ -83,7 +83,9 @@ int Virtual_Machine::start() {
                         ID_tables_vec[arg1_lex.get_add_value()][ID_tables_vec[arg1_lex.get_add_value()]
                         [arg1_lex.get_value()].get_value()].set_name(tmp_str);
                         break;
-                        //TODO: case LEX_STRUCT:
+                    case LEX_STRUCT:
+                        break;
+
                 }
                 break;
             case LEX_PLUS:

@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
     }
     catch (exception& ex){
         cout << ex.what() << endl;
-        return -5;
+        return -1;
     }
     return 0;
 }
