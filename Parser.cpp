@@ -619,7 +619,10 @@ void Parser::check_assign() {
     lex_stack.pop();
     Lex op2 = lex_stack.top();
     lex_stack.pop();
-    if ( op1.get_type() != op2.get_type() )
+    if(op2.get_type() != LEX_STRING){
+        if ( op1.get_type() != op2.get_type() )
+            throw Exception("Parser error: wrong types in assign");
+    } else if(op1.get_type() != LEX_STRING && op1.get_type() != LEX_STRC)
         throw Exception("Parser error: wrong types in assign");
     if(op1.get_type() == LEX_STRUCT_T)
         throw Exception("Parser error: structure type in assign");

@@ -27,5 +27,3 @@ public:
 
     int start();
 };
-
-//TODO: add struct assignment
