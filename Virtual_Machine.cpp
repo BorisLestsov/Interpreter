@@ -84,7 +84,8 @@ int Virtual_Machine::start() {
                         [arg1_lex.get_value()].get_value()].set_name(tmp_str);
                         break;
                     case LEX_STRUCT:
-
+                        ID_tables_vec[ID_tables_vec[0][arg1_lex.get_value()].get_value()] =
+                                ID_tables_vec[ID_tables_vec[0][arg2_lex.get_value()].get_value()];
                         break;
 
                 }
