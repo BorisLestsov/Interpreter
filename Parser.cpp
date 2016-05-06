@@ -2,7 +2,7 @@
 // Created by Boris on 10.04.2016.
 //
 
-#include "parser1.h"
+#include "Parser.h"
 
 Parser::Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& ID_tables_vec_par):
         lex_vec(lex_vec_par),

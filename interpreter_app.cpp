@@ -1,8 +1,8 @@
 //
 // Created by Boris on 10.04.2016.
 //
-#include "scanner1.h"
-#include "parser1.h"
+#include "Scanner.h"
+#include "Parser.h"
 
 using namespace std;
 

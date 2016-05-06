@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <unistd.h>
-#include "scanner1.h"
+#include "Scanner.h"
 #include <stack>
 
 using namespace std;
