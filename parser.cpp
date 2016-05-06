@@ -65,7 +65,6 @@ void Parser::DECLARATIONS() {
         get_lex();
     }
     //cout << "------------------------------" << endl;
-    //get_lex();
 /*
     cout << "--------TABLES--------" << endl;
     int i;
@@ -73,6 +72,7 @@ void Parser::DECLARATIONS() {
         ID_tables_vec[i].print_table();
     }
     cout << "------------------------------" << endl;*/
+    //get_lex();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         DECL();
         get_lex();
@@ -301,7 +301,10 @@ void Parser::OP(){
                     if ( !(ID_tables_vec[tmp_add_val][tmp_val].get_declared()) )
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
                     prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
-                    lex_stack.push(ID_tables_vec[tmp_add_val][tmp_val].get_type());
+                    lex_stack.push(Lex(ID_tables_vec[tmp_add_val][tmp_val].get_type(),
+                                       ID_tables_vec[tmp_add_val][tmp_val].get_value()));
+                                //Lex:  type    ID type in tables
+                                //      val     ID value in tables
                     get_lex();
                     EXPRESSION();
                     check_assign();
@@ -341,7 +344,9 @@ void Parser::OP(){
             get_lex();
             break;
         case LEX_BREAK:
-            throw Exception("Parser error: IN DEVELOPEMENT: ", Lex::lex_map[c_type]);
+            break_stack.push(prog.get_pos());
+            prog.blank();
+            prog.push_back(Lex(RPN_GOTO));
             get_lex();
             break;
         case LEX_GOTO:
@@ -353,8 +358,10 @@ void Parser::OP(){
                 prog.push_back(Lex(RPN_GOTO));
             } else {
                 tmp_type = ID_tables_vec[0][c_val].get_type();
-                if(tmp_type == LEX_INT || tmp_type == LEX_BOOL || tmp_type == LEX_STRING || tmp_type == LEX_STRC)
-                    throw Exception("Parser error: attempt to use previously declared ID as Label: ",  ID_tables_vec[0][c_val].get_name());
+                if(tmp_type == LEX_INT || tmp_type == LEX_BOOL || tmp_type == LEX_STRING ||
+                        tmp_type == LEX_STRC || tmp_type == LEX_STRUCT_T || tmp_type == LEX_STRUCT)
+                    throw Exception("Parser error: attempt to use previously declared ID as Label: ",
+                                    ID_tables_vec[0][c_val].get_name());
                 ID_tables_vec[0][c_val].set_type(LEX_LABEL);
                 ID_tables_vec[0][c_val].set_declared(true);
                 ID_tables_vec[0][c_val].set_assigned(false);
@@ -472,7 +479,8 @@ void Parser::F ()
     switch (c_type){
         case LEX_ID:
             check_id();
-            lex_stack.push(ID_tables_vec[c_add_val][c_val].get_type());
+            lex_stack.push(Lex(ID_tables_vec[c_add_val][c_val].get_type(),
+                           ID_tables_vec[c_add_val][c_val].get_value()));
             prog.push_back (Lex (LEX_ID, c_val, c_add_val));
             get_lex();
             break;
@@ -516,7 +524,7 @@ void Parser::F ()
 
 //-------------symantics check:--------------
 void Parser::eq_bool() {
-    if ( lex_stack.top() != LEX_BOOL )
+    if ( lex_stack.top().get_type() != LEX_BOOL )
         throw "expression is not boolean";
     lex_stack.pop();
 }
@@ -528,11 +536,11 @@ void Parser::check_id() {
 
 void Parser::check_op() {
     lex_t operand1, operand2, operation, result_type;
-    operand2 = lex_stack.top();
+    operand2 = lex_stack.top().get_type();
     lex_stack.pop();
-    operation = lex_stack.top();
+    operation = lex_stack.top().get_type();
     lex_stack.pop();
-    operand1 = lex_stack.top();
+    operand1 = lex_stack.top().get_type();
     lex_stack.pop();
 
     if(operand1 == LEX_INT){
@@ -559,14 +567,14 @@ void Parser::check_op() {
         } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
         if (operand2 != LEX_STRING && operand2 != LEX_STRC)
             throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
-    } else throw Exception("Parser error: wrong lexem: ", Lex::lex_map[operation]);
+    } else throw Exception("Parser error: wrong operation: ", Lex::lex_map[operation]);
     lex_stack.push(result_type);
     prog.push_back(operation);
 
 }
 
 void Parser::check_not() {
-    if (lex_stack.top() != LEX_BOOL)
+    if (lex_stack.top().get_type() != LEX_BOOL)
         throw Exception("Parser error: wrong type in \"not\"");
     else
     {
@@ -577,8 +585,16 @@ void Parser::check_not() {
 }
 
 void Parser::check_assign() {
-    if ( lex_stack.top() != lex_stack.top() )
+    Lex op1 = lex_stack.top();
+    lex_stack.pop();
+    Lex op2 = lex_stack.top();
+    lex_stack.pop();
+    if ( op1.get_type() != op2.get_type() )
         throw Exception("Parser error: wrong types in assign");
-    lex_stack.pop();
-    lex_stack.pop();
+    if(op1.get_type() == LEX_STRUCT_T)
+        throw Exception("Parser error: structure type in assign");
+    if(op1.get_type() == LEX_STRUCT)
+        if(op1.get_value() != op2.get_value())
+            throw Exception("Parser error: assignment of structures of diffrent types");
+
 }

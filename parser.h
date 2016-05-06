@@ -19,7 +19,8 @@ class Parser{
     const vector<Lex>& lex_vec;
     vector<Lex>::const_iterator index;
     vector<ID_table_t>& ID_tables_vec;
-    stack<lex_t> lex_stack;
+    stack<Lex> lex_stack;
+    stack<int> break_stack;
     Lex c_lex;
     lex_t c_type;
     int c_val;
