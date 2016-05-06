@@ -122,6 +122,7 @@ void Scanner::start() throw(exception){
                         com_type = '*';
                     } else {
                         add_lex(LEX_SLASH, LEX_SLASH);
+                        ungetc(c,f);
                         STATE = H_ST;
                     }
                 } else if (c == '!') {

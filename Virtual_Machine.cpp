@@ -4,6 +4,7 @@
 
 #include "Virtual_Machine.h"
 #include <stack>
+#include "Exception.h"
 
 Virtual_Machine::Virtual_Machine(RPN &prog_par, vector<ID_table_t>& ID_tables_vec_par):
     prog(prog_par),
@@ -19,7 +20,7 @@ void Virtual_Machine::get_cmd() {
     c_cmd = *cmd_ptr;
     ++cmd_ptr;
 
-    cout << setw(2) << i++  << c_cmd << endl;
+    //cout << setw(2) << i++  << c_cmd << endl;
 }
 
 bool Virtual_Machine::prog_finished() const {
@@ -96,29 +97,29 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_STRC, -1));
                 }
                 break;
-            /*case LEX_TIMES:
+            case LEX_TIMES:
                 arg1_lex = args.top();
                 args.pop();
                 arg2_lex = args.top();
                 args.pop();
-                args.push(arg1_lex.value * arg2_lex.value);
+                args.push(Lex(LEX_NUM, arg1_lex.get_value() * arg2_lex.get_value()));
                 break;
             case LEX_MINUS:
+                arg2_lex = args.top(); //tmp_pairs are reversed because of RPN
+                args.pop();
                 arg1_lex = args.top();
                 args.pop();
-                arg2_lex = args.top();
-                args.pop();
-                args.push(arg2_lex.value - arg1_lex.value);   //tmp_pairs are reversed because of RPN
+                args.push(Lex(LEX_NUM, arg1_lex.get_value() - arg2_lex.get_value()));
                 break;
             case LEX_SLASH:
+                arg2_lex = args.top(); //tmp_pairs are reversed because of RPN
+                args.pop();
                 arg1_lex = args.top();
                 args.pop();
-                arg2_lex = args.top();
-                args.pop();
-                if (!arg1_lex.value)
-                    args.push(arg2_lex.value - arg1_lex.value);   //tmp_pairs are reversed because of RPN
+                if (arg2_lex.get_value())
+                    args.push(Lex(LEX_NUM, arg1_lex.get_value() / arg2_lex.get_value()));
                 else throw Exception("Runtime error: division by zero");
-                break;*/
+                break;
             case LEX_WRITE:
                 arg1_lex = args.top();
                 args.pop();
