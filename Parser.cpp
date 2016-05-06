@@ -17,7 +17,7 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    //cout << c_lex << endl;
+    cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
@@ -592,8 +592,9 @@ void Parser::check_op() {
     } else if(operand1 == LEX_STRING || operand1 == LEX_STRC){
         if(operation == LEX_PLUS){
             result_type = LEX_STRING;
-        } else if(operation == LEX_EQ || operation == LEX_NEQ ){
-            result_type = LEX_STRING;
+        } else if(operation == LEX_EQ || operation == LEX_LSS || operation == LEX_GTR ||
+                  operation == LEX_LEQ || operation == LEX_GEQ || operation == LEX_NEQ){
+            result_type = LEX_BOOL;
         } else throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);
         if (operand2 != LEX_STRING && operand2 != LEX_STRC)
             throw Exception("Parser error: wrong type in operation: ", Lex::lex_map[operation]);

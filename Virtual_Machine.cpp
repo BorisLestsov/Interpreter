@@ -11,8 +11,8 @@ Virtual_Machine::Virtual_Machine(RPN &prog_par, vector<ID_table_t>& ID_tables_ve
     cmd_ptr(prog.cbegin()),
     ID_tables_vec(ID_tables_vec_par),
     c_lex(LEX_NULL),
-    arg1_lex(LEX_NULL),
-    arg2_lex(LEX_NULL){}
+    arg1(LEX_NULL),
+    arg2(LEX_NULL){}
 
 void Virtual_Machine::get_cmd() {
     static int i = 0;
@@ -27,14 +27,6 @@ bool Virtual_Machine::prog_finished() const {
     return cmd_ptr == prog.cend();
 }
 
-void Virtual_Machine::make_c_lex() {
-    c_lex = c_cmd;
-}
-
-void Virtual_Machine::make_tmp() {
-    arg1_lex = c_lex;
-}
-
 int Virtual_Machine::start() {
     stack<Lex> args;
 
@@ -42,11 +34,15 @@ int Virtual_Machine::start() {
         get_cmd();
         switch(c_cmd.get_type()){
             case LEX_NUM:
-            case LEX_TRUE:
-            case LEX_FALSE:
             case RPN_ADDRESS:
             case RPN_LABEL:
                 args.push(c_cmd);
+                break;
+            case LEX_TRUE:
+                args.push(Lex(LEX_BOOL, 1));
+                break;
+            case LEX_FALSE:
+                args.push(Lex(LEX_BOOL, 0));
                 break;
             case LEX_STRC:
                 args.push(c_cmd);
@@ -58,10 +54,7 @@ int Virtual_Machine::start() {
                         args.push(Lex(LEX_NUM, ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value()));
                         break;
                     case LEX_BOOL:
-                        if(ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value())
-                            args.push(Lex(LEX_TRUE, 1));
-                        else
-                            args.push(Lex(LEX_FALSE, 0));
+                        args.push(Lex(LEX_BOOL, ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value()));
                         break;
                     case LEX_STRING:
                         args.push(Lex(LEX_STRC, ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value(),
@@ -76,33 +69,33 @@ int Virtual_Machine::start() {
                 }
                 break;
             case LEX_ASSIGN:
-                arg2_lex = args.top();
+                arg2 = args.top();
                 args.pop();
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                switch (ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_type()) {
+                switch (ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_type()) {
                     case LEX_INT:
-                        if(arg2_lex.get_type() == LEX_NUM)
-                            tmp1 = arg2_lex.get_value();
+                        if(arg2.get_type() == LEX_NUM)
+                            tmp1 = arg2.get_value();
                         else throw Exception("Runtime error: assignment error");
-                        ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].set_value(tmp1);
+                        ID_tables_vec[arg1.get_add_value()][arg1.get_value()].set_value(tmp1);
                         break;
                     case LEX_BOOL:
-                        if(arg2_lex.get_type() == LEX_BOOL)
-                            tmp1 = arg2_lex.get_value();
+                        if(arg2.get_type() == LEX_BOOL)
+                            tmp1 = arg2.get_value();
                         else throw Exception("Runtime error: assignment error");
-                        ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].set_value(tmp1);
+                        ID_tables_vec[arg1.get_add_value()][arg1.get_value()].set_value(tmp1);
                         break;
                     case LEX_STRING:
-                        if(arg2_lex.get_type() != LEX_STRC)
+                        if(arg2.get_type() != LEX_STRC)
                             throw Exception("Runtime error: assignment error");
-                        ID_tables_vec[arg1_lex.get_add_value()][ID_tables_vec[arg1_lex.get_add_value()]
-                        [arg1_lex.get_value()].get_value()].set_name(tmp_str);
+                        ID_tables_vec[arg1.get_add_value()][ID_tables_vec[arg1.get_add_value()]
+                        [arg1.get_value()].get_value()].set_name(tmp_str);
                         tmp_str.clear();
                         break;
                     case LEX_STRUCT:
-                        ID_tables_vec[ID_tables_vec[0][arg1_lex.get_value()].get_value()] =
-                                ID_tables_vec[ID_tables_vec[0][arg2_lex.get_value()].get_value()];
+                        ID_tables_vec[ID_tables_vec[0][arg1.get_value()].get_value()] =
+                                ID_tables_vec[ID_tables_vec[0][arg2.get_value()].get_value()];
                         break;
                     default: throw Exception("Runtime error: assignment error");
                 }
@@ -110,157 +103,218 @@ int Virtual_Machine::start() {
             case LEX_PLUS:
                 lex_t res_t;
 
-                arg2_lex = args.top();
+                arg2 = args.top();
                 args.pop();
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_NUM){
-                    tmp1 = arg1_lex.get_value();
+                if(arg1.get_type() == LEX_NUM){
+                    tmp1 = arg1.get_value();
                     res_t = LEX_NUM;
-                } else if(arg1_lex.get_type() == LEX_STRC){
-                    if(arg1_lex.get_value() >= 0)
-                        tmp_str = ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_name();
+                } else if(arg1.get_type() == LEX_STRC){
+                    if(arg1.get_value() >= 0)
+                        tmp_str = ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name();
                     res_t = LEX_STRC;
                 } else throw Exception("Runtime error: error in operator +");
 
                 if(res_t == LEX_NUM){
-                    if(arg1_lex.get_type() == LEX_NUM)
-                        tmp2 = arg2_lex.get_value();
+                    if(arg1.get_type() == LEX_NUM)
+                        tmp2 = arg2.get_value();
                     else
-                        tmp2 = ID_tables_vec[arg2_lex.get_add_value()][arg2_lex.get_value()].get_value();
+                        tmp2 = ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_value();
                     args.push(Lex(LEX_NUM, tmp1 + tmp2));
                 } else {
-                    if (arg2_lex.get_type() == LEX_STRC)
-                        tmp_str += ID_tables_vec[arg2_lex.get_add_value()][arg2_lex.get_value()].get_name();
+                    if (arg2.get_type() == LEX_STRC)
+                        tmp_str += ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name();
                         res_t = LEX_STRC;
                         args.push(Lex(LEX_STRC, -1));
                 }
                 break;
             case LEX_TIMES:
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                arg2_lex = args.top();
+                arg2 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_NUM){
-                    tmp1  = arg1_lex.get_value();
+                if(arg1.get_type() == LEX_NUM){
+                    tmp1  = arg1.get_value();
                 }
-                if(arg2_lex.get_type() == LEX_NUM){
-                    tmp2  = arg2_lex.get_value();
+                if(arg2.get_type() == LEX_NUM){
+                    tmp2  = arg2.get_value();
                 }
                 args.push(Lex(LEX_NUM, tmp1 * tmp2));
                 break;
             case LEX_MINUS:
-                arg2_lex = args.top(); //tmp_pairs are reversed because of RPN
+                arg2 = args.top(); //tmp_pairs are reversed because of RPN
                 args.pop();
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_NUM){
-                    tmp1  = arg1_lex.get_value();
+                if(arg1.get_type() == LEX_NUM){
+                    tmp1  = arg1.get_value();
                 }
-                if(arg2_lex.get_type() == LEX_NUM){
-                    tmp2  = arg2_lex.get_value();
+                if(arg2.get_type() == LEX_NUM){
+                    tmp2  = arg2.get_value();
                 }
                 args.push(Lex(LEX_NUM, tmp1 - tmp2));
                 break;
             case LEX_SLASH:
-                arg2_lex = args.top(); //tmp_pairs are reversed because of RPN
+                arg2 = args.top(); //tmp_pairs are reversed because of RPN
                 args.pop();
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_NUM){
-                    tmp1  = arg1_lex.get_value();
+                if(arg1.get_type() == LEX_NUM){
+                    tmp1  = arg1.get_value();
                 }
-                if(arg2_lex.get_type() == LEX_NUM){
-                    tmp2  = arg2_lex.get_value();
+                if(arg2.get_type() == LEX_NUM){
+                    tmp2  = arg2.get_value();
                 }
                 if (tmp2)
                     args.push(Lex(LEX_NUM, tmp1 / tmp2));
                 else throw Exception("Runtime error: division by zero");
                 break;
             case LEX_READ:
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                switch (ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_type()) {
+                switch (ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_type()) {
                     case LEX_INT:
                         cout << "Input integer for \""
-                                << ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_name()
+                                << ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name()
                                 << "\": " ;
                         cin >> tmp1;
-                        ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].set_value(tmp1);
+                        ID_tables_vec[arg1.get_add_value()][arg1.get_value()].set_value(tmp1);
                         break;
                     case LEX_BOOL:
                         cout << "Input boolean integer for \""
-                        << ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_name()
+                        << ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name()
                         << "\": " ;
                         cin >> tmp1;
-                        ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].set_value(tmp1 != 0);
+                        ID_tables_vec[arg1.get_add_value()][arg1.get_value()].set_value(tmp1 != 0);
                         break;
                     case LEX_STRING:
                         cout << "Input string for \""
-                        << ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_name()
+                        << ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name()
                         << "\": ";
                         cin >> tmp_str;
-                        ID_tables_vec[arg1_lex.get_add_value()][ID_tables_vec[arg1_lex.get_add_value()]
-                        [arg1_lex.get_value()].get_value()].set_name(tmp_str);
+                        ID_tables_vec[arg1.get_add_value()][ID_tables_vec[arg1.get_add_value()]
+                        [arg1.get_value()].get_value()].set_name(tmp_str);
                         break;
                 }
                 break;
             case LEX_WRITE:
-                arg1_lex = args.top();
+                arg1 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_NUM ||
-                        arg1_lex.get_type() == LEX_TRUE ||
-                        arg1_lex.get_type() == LEX_FALSE)
-                    cout << arg1_lex.get_value();
-                else if(arg1_lex.get_type() == LEX_STRC) {
-                    if(arg1_lex.get_value() >= 0)
-                        cout << ID_tables_vec[arg1_lex.get_add_value()][arg1_lex.get_value()].get_name();
+                if(arg1.get_type() == LEX_NUM ||
+                   arg1.get_type() == LEX_BOOL)
+                    cout << arg1.get_value();
+                else if(arg1.get_type() == LEX_STRC) {
+                    if(arg1.get_value() >= 0)
+                        cout << ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name();
                     else
                         cout << tmp_str;
                 }
                 tmp_str.clear();
                 break;
-            /*case LEX_NOT:
-                arg1_lex = args.top();
+            case LEX_NOT:
+                arg1 = args.top();
                 args.pop();
-                if(arg1_lex.get_type() == LEX_TRUE)
-                    args.push(Lex(LEX_FALSE, 0));
-                else if(arg1_lex.get_type() == LEX_FALSE)
-                    args.push(Lex(LEX_TRUE, 1));
-                else if(arg1_lex.get_type() == LEX_ID)
-                    ;
+                if(arg1.get_type() == LEX_BOOL)
+                    args.push(Lex(LEX_BOOL, arg1.get_value()));
+                else throw Exception("Runtime error: \"not\" in non-boolean expression");
                 break;
             case LEX_OR:
-                i = args.pop();
-                args.push ( args.pop() || i );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() == LEX_BOOL && arg2.get_type() == LEX_BOOL)
+                    args.push(Lex(LEX_BOOL, arg1.get_value() || arg2.get_value()));
+                else throw Exception("Runtime error: \"or\" in non-boolean expression");
                 break;
             case LEX_AND:
-                i = args.pop();
-                args.push ( args.pop() && i );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() == LEX_BOOL && arg2.get_type() == LEX_BOOL)
+                    args.push(Lex(LEX_BOOL, arg1.get_value() && arg2.get_value()));
+                else throw Exception("Runtime error: \"or\" in non-boolean expression");
                 break;
             case LEX_EQ:
-                args.push ( args.pop() == args.pop() );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: == comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() ==
+                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() == arg2.get_value()));
                 break;
             case LEX_LSS:
-                i = args.pop();
-                args.push ( args.pop() < i);
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: < comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() <
+                                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() < arg2.get_value()));
                 break;
             case LEX_GTR:
-                i = args.pop();
-                args.push ( args.pop() > i );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: > comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() >
+                                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() > arg2.get_value()));
                 break;
             case LEX_LEQ:
-                i = args.pop();
-                args.push ( args.pop() <= i );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: <= comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() <=
+                                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() <= arg2.get_value()));
                 break;
             case LEX_GEQ:
-                i = args.pop();
-                args.push ( args.pop() >= i );
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: >= comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() >=
+                                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() >= arg2.get_value()));
                 break;
             case LEX_NEQ:
-                i = args.pop();
-                args.push ( args.pop() != i );
-                break;*/
+                arg1 = args.top();
+                args.pop();
+                arg2 = args.top();
+                args.pop();
+                if(arg1.get_type() != arg2.get_type())
+                    throw Exception("Runtime error: != comparison of wrong types");
+                if(arg1.get_type() == LEX_STRC)
+                    args.push(Lex(LEX_BOOL, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name() !=
+                                            ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
+                else
+                    args.push(Lex(LEX_BOOL, arg1.get_value() != arg2.get_value()));
+                break;
             case LEX_FIN:
                 cout << "$$$$$$ Program finished correctly $$$$$$" << endl;
                 break;
