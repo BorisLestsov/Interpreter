@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
         Lex::construct_lex_map();
 
         main_scanner.start();
-        main_scanner.print_vec();
+        //main_scanner.print_vec();
         cout << "--------TABLES--------" << endl;
         int i;
         for(i = 0; i < main_scanner.ID_tables_vec.size(); ++i){

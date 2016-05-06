@@ -220,27 +220,27 @@ int Virtual_Machine::start() {
                 else throw Exception("Runtime error: \"not\" in non-boolean expression");
                 break;
             case LEX_OR:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() == LEX_BOOL && arg2.get_type() == LEX_BOOL)
                     args.push(Lex(LEX_BOOL, arg1.get_value() || arg2.get_value()));
                 else throw Exception("Runtime error: \"or\" in non-boolean expression");
                 break;
             case LEX_AND:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() == LEX_BOOL && arg2.get_type() == LEX_BOOL)
                     args.push(Lex(LEX_BOOL, arg1.get_value() && arg2.get_value()));
                 else throw Exception("Runtime error: \"or\" in non-boolean expression");
                 break;
             case LEX_EQ:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: == comparison of wrong types");
@@ -251,9 +251,9 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_BOOL, arg1.get_value() == arg2.get_value()));
                 break;
             case LEX_LSS:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: < comparison of wrong types");
@@ -264,9 +264,9 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_BOOL, arg1.get_value() < arg2.get_value()));
                 break;
             case LEX_GTR:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: > comparison of wrong types");
@@ -277,9 +277,9 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_BOOL, arg1.get_value() > arg2.get_value()));
                 break;
             case LEX_LEQ:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: <= comparison of wrong types");
@@ -290,9 +290,9 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_BOOL, arg1.get_value() <= arg2.get_value()));
                 break;
             case LEX_GEQ:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: >= comparison of wrong types");
@@ -303,9 +303,9 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_BOOL, arg1.get_value() >= arg2.get_value()));
                 break;
             case LEX_NEQ:
-                arg1 = args.top();
-                args.pop();
                 arg2 = args.top();
+                args.pop();
+                arg1 = args.top();
                 args.pop();
                 if(arg1.get_type() != arg2.get_type())
                     throw Exception("Runtime error: != comparison of wrong types");
@@ -314,6 +314,28 @@ int Virtual_Machine::start() {
                                             ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name()));
                 else
                     args.push(Lex(LEX_BOOL, arg1.get_value() != arg2.get_value()));
+                break;
+            case RPN_GOTO:
+                arg1 = args.top();
+                args.pop();
+                if(arg1.get_type() != RPN_LABEL)
+                    throw Exception("Runtime error: expected label in RPN_GOTO, but recieved: ", Lex::lex_map[c_cmd.get_type()]);
+                cmd_ptr = prog.begin() + arg1.get_value();
+                break;
+            case RPN_FGOTO:
+                arg2 = args.top();
+                args.pop();
+
+                arg1 = args.top();
+                args.pop();
+                if(arg2.get_type() != RPN_LABEL)
+                    throw Exception("Runtime error: expected label in RPN_FGOTO, but recieved: ",
+                                    Lex::lex_map[c_cmd.get_type()]);
+                if (arg1.get_type() != LEX_BOOL)
+                    throw Exception("Runtime error: expected boolean expression in RPN_FGOTO , but recieved: ",
+                                    Lex::lex_map[c_cmd.get_type()]);
+                if(!arg1.get_value())
+                    cmd_ptr = prog.begin() + arg2.get_value();
                 break;
             case LEX_FIN:
                 cout << "$$$$$$ Program finished correctly $$$$$$" << endl;

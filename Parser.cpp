@@ -17,7 +17,7 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    cout << c_lex << endl;
+    //cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
