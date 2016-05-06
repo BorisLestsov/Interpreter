@@ -69,5 +69,3 @@ public:
 };
 
 //TODO: how to show wrong string in user's program?
-//TODO: Implement "break"
-//TODO: check identical structure names
