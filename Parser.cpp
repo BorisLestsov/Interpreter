@@ -17,7 +17,7 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    //cout << c_lex << endl;
+    cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
@@ -370,6 +370,9 @@ void Parser::OP(){
                 case LEX_COLON:
                     if(ID_tables_vec[0][tmp_val].get_type() == LEX_LABEL) {
                         //found previously in goto
+                        if (ID_tables_vec[0][tmp_val].get_assigned())
+                            throw Exception("Parser error: multiple assign of Label: ",
+                                            ID_tables_vec[0][tmp_val].get_name());
                         prog[ID_tables_vec[0][tmp_val].get_value()] = Lex(RPN_LABEL, prog.get_pos());
                         ID_tables_vec[0][tmp_val].set_value(prog.get_pos() - 1);
                         ID_tables_vec[0][tmp_val].set_assigned(true);
@@ -398,7 +401,7 @@ void Parser::OP(){
             COMPLEX_OP();
             break;
         case LEX_SEMICOLON:
-            get_lex();
+            //get_lex();
             break;
         case LEX_BREAK:
             break_stack.push(prog.get_pos());
