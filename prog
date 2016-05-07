@@ -14,7 +14,7 @@ program
  bool b = true;
  };
 
- int a = 51, b = hello, c;
+ int a = 60, b = hello, c;
  #undef hello
  string x = "abc", y, z = "hey";
  bool hello = true;
@@ -24,16 +24,17 @@ program
  if (c >= 100 or b == c and (true or a*b<3)){
    c = a / b; 			// hello
     read (y);
-    write (y);
-    write (x + (y + z), c);
+    write (y, "\n");
+    write (x + y + z, c, "\n");
  } else 
-    c = a; //= 21;
+    c = a+ 100; //= 21;
  while (c > 100)
  {
  c = s.i - 5;
  write (c);
  x = x + "step";
  s.a="yo"+z;
+ write(s.a, "\n");
  //break;
  }
  goto M;

@@ -90,7 +90,7 @@ void Scanner::start() throw(exception){
     do {
         gc();
         //usleep(250000);
-        //cout << c << ' ';
+        cout << c << ' ';
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;
@@ -140,7 +140,7 @@ void Scanner::start() throw(exception){
                     break;
                 } else if (feof(f)) {
                     if(skip_stack.empty())
-                        add_lex(LEX_FIN);   //Do I need it?
+                        add_lex(LEX_FIN);
                     else throw Exception("Scanner error: expected endif macro", c);
                     return;
                 } else if (c == '#') {
@@ -257,7 +257,7 @@ void Scanner::start() throw(exception){
                     if(feof(f))
                         throw Exception("Scanner error: unclosed string");
                     if(!struct_flag)
-                        j = ID_tables_vec[0].append(buffer, LEX_STRC);
+                        j = ID_tables_vec[0].append(buffer.insert(0,1,'\0'), LEX_STRC); //that '\0' is cool
                     else
                         j = ID_tables_vec[struct_index].append(buffer, LEX_STRC);
                     add_lex(LEX_STRC, j);
@@ -312,7 +312,7 @@ void Scanner::start() throw(exception){
                         struct_flag = false;
                         struct_name_defined = false;
                         struct_names = true;
-                    } else if(struct_names && !(j == 4))
+                    } else if(j != 4)
                         struct_names = false;
                     add_lex(DEL_LEXEMS[j], j);
                     ungetc(c, f);

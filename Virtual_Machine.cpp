@@ -59,11 +59,13 @@ int Virtual_Machine::start() {
                     case LEX_STRING:
                         args.push(Lex(LEX_STRC, ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value(),
                                       c_cmd.get_add_value()));
+                        //args.push(Lex(LEX_STRC, -1, 0));
                         tmp_str += ID_tables_vec[c_cmd.get_add_value()]
                             [ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_value()].get_name();
                         break;
                     case LEX_STRC:
                         args.push(Lex(LEX_STRC, c_cmd.get_value(), c_cmd.get_add_value()));
+                        //args.push(Lex(LEX_STRC, -1, 0));
                         tmp_str += ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_name();
                         break;
                 }

@@ -180,8 +180,11 @@ void Parser::SWITCH_ID(ID_table_t& table) {
                         table[tmp_val].set_value(c_val);
                     } else throw Exception("Parser error: expected string constant but recieved lexem: ", Lex::lex_map[c_type]);
                     get_lex();
-                } else
+                } else {
                     table[tmp_val].set_assigned(false);
+                    table.table.push_back(ID(LEX_STRC, "", 0));
+                    table[tmp_val].set_value((int) table.table.size() - 1);
+                }
                 if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
                     continue;
                 else throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
