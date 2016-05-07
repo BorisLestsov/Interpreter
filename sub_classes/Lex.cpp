@@ -83,6 +83,8 @@ void Lex::construct_lex_map(){
             "RPN_FGO",
             "RPN_LABEL",
             "RPN_ADDRESS",
+            "LEX_UMINUS",
+            "LEX_UPLUS",
             "__END_TBL"
     };
 

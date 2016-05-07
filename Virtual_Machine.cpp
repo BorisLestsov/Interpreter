@@ -161,6 +161,20 @@ int Virtual_Machine::start() {
                 }
                 args.push(Lex(LEX_NUM, tmp1 - tmp2));
                 break;
+            case LEX_UPLUS:
+                arg1 = args.top();
+                args.pop();
+                if(arg1.get_type() == LEX_NUM)
+                    args.push(Lex(LEX_NUM, arg1.get_value()));
+                else throw Exception("Runtime error: \"unary +\" to non-integer expression");
+                break;
+            case LEX_UMINUS:
+                arg1 = args.top();
+                args.pop();
+                if(arg1.get_type() == LEX_NUM)
+                    args.push(Lex(LEX_NUM, -arg1.get_value()));
+                else throw Exception("Runtime error: \"unary -\" to non-integer expression");
+                break;
             case LEX_SLASH:
                 arg2 = args.top(); //tmp_pairs are reversed because of RPN
                 args.pop();

@@ -40,6 +40,7 @@ class Parser{
     void OP();
     void COMPLEX_OP();
     void EXPRESSION();
+    void ULTRA_ULTRA_HIGH();
     void ULTRA_HIGH();
     void HIGH();
     void MID();
@@ -55,6 +56,7 @@ class Parser{
     void check_op();
     void check_not();
     void check_assign();
+    void check_left_op();
 
     inline void get_lex();
     inline void unget_lex();

@@ -56,6 +56,8 @@ enum lex_t {
     RPN_FGOTO,
     RPN_LABEL,
     RPN_ADDRESS,
+    LEX_UMINUS,
+    LEX_UPLUS,
     __END_TBL
 };
 

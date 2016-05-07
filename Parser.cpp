@@ -17,7 +17,7 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    //cout << c_lex << endl;
+    cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
@@ -282,6 +282,7 @@ void Parser::OP(){
             prog.push_back(Lex(RPN_GOTO));
             blank_pos3 = prog.get_pos();
             OP();
+            get_lex();
             prog.push_back(Lex(RPN_LABEL, blank_pos0));
             prog.push_back(Lex(RPN_GOTO));
             prog[blank_pos2] = Lex(RPN_LABEL, prog.get_pos());
@@ -499,14 +500,41 @@ void Parser::HIGH() {
 }
 
 void Parser::ULTRA_HIGH() {
-    F();
+    ULTRA_ULTRA_HIGH();
     while ( c_type == LEX_TIMES || c_type == LEX_SLASH) {
         lex_stack.push (c_type);
         get_lex();
-        F();
+        ULTRA_ULTRA_HIGH();
         check_op();
     }
 }
+void Parser::ULTRA_ULTRA_HIGH() {
+    if (c_type == LEX_PLUS) {
+        lex_stack.push(LEX_UPLUS);
+        get_lex();
+        F();
+        check_left_op();
+    } else if (c_type == LEX_MINUS) {
+        lex_stack.push(LEX_UMINUS);
+        get_lex();
+        F();
+        check_left_op();
+    } else F();
+}
+void Parser::check_left_op() {
+    lex_t operand, operation;
+    operand = lex_stack.top().get_type();
+    lex_stack.pop();
+    operation = lex_stack.top().get_type();
+    lex_stack.pop();
+    if(operation != LEX_UPLUS && operation != LEX_UMINUS)
+        throw Exception("Parser error: unary operator: ", Lex::lex_map[operation]);
+    if(operand != LEX_INT)
+        throw Exception("Parser error: unary operator to: ", Lex::lex_map[operand]);
+    lex_stack.push(LEX_INT);
+    prog.push_back(operation);
+}
+
 
 void Parser::F ()
 {
@@ -655,3 +683,4 @@ void Parser::struct_init() {
     }
 
 }
+
