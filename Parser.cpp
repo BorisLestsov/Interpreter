@@ -4,7 +4,7 @@
 
 #include "Parser.h"
 
-Parser::Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& ID_tables_vec_par):
+Parser::Parser(vector<Lex>& lex_vec_par, vector<ID_table_t>& ID_tables_vec_par):
         lex_vec(lex_vec_par),
         ID_tables_vec(ID_tables_vec_par)
 {
@@ -358,10 +358,7 @@ void Parser::OP(){
                 case LEX_ASSIGN:
                     if (!(ID_tables_vec[tmp_add_val][tmp_val].get_declared()))
                         throw Exception("Parser error: use of undeclared ID: ", ID_tables_vec[c_add_val][c_val].get_name());
-                    if(tmp_add_val != 0)
-                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, ID_tables_vec[0][tmp_add_val].get_value()));
-                    else
-                        prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
+                    prog.push_back(Lex(RPN_ADDRESS, tmp_val, tmp_add_val));
                     lex_stack.push(Lex(ID_tables_vec[tmp_add_val][tmp_val].get_type(),
                                        ID_tables_vec[tmp_add_val][tmp_val].get_value()));
                                 //Lex:  type    ID type in tables
@@ -543,10 +540,7 @@ void Parser::F ()
             check_id();
             lex_stack.push(Lex(ID_tables_vec[c_add_val][c_val].get_type(),
                            ID_tables_vec[c_add_val][c_val].get_value()));
-            if(c_add_val != 0)
-                prog.push_back (Lex (LEX_ID, c_val, ID_tables_vec[0][c_add_val].get_value()));
-            else
-                prog.push_back (Lex (LEX_ID, c_val, 0));
+            prog.push_back ( c_lex );
             get_lex();
             break;
         case LEX_NUM:
@@ -680,6 +674,16 @@ void Parser::struct_init() {
             ptr->set_value(table_index);
         }
         ++ptr;
+    }
+
+    cout << endl << endl;
+    auto lex_ptr = lex_vec.begin();
+    auto lex_end = lex_vec.end();
+    while(lex_ptr != lex_end){
+        if(lex_ptr->get_add_value() != 0){
+            lex_ptr->set_add_value(ID_tables_vec[0][lex_ptr->get_add_value()].get_value());
+        }
+        ++lex_ptr;
     }
 
 }

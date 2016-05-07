@@ -1,15 +1,16 @@
-/*
+/*program {
+
 #define N 5
 
 #ifdef N
-program
-#undef N
+write("ifdef\n");
+
 #ifndef N
-{
+write("ifndef\n");
 #else
-}
+write("else1\n");
 #endif
 #else
-*
+write("else2\n");
 #endif
-*/
+}*/

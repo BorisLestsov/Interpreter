@@ -187,7 +187,7 @@ void Scanner::start() throw(exception){
                             } else if (struct_names){
                                 j = ID_tables_vec[0].append(buffer, LEX_STRUCT);
                                 ID_tables_vec[0][j].set_value(struct_index);
-                                add_lex(LEX_ID, j, struct_index);
+                                add_lex(LEX_ID, j, 0);
                             } else {
                                 if(lex_vec.back().get_type() == LEX_DOT){
                                     lex_vec.pop_back();
@@ -199,7 +199,8 @@ void Scanner::start() throw(exception){
                                     lex_vec.pop_back();
                                     j = ID_tables_vec[ID_tables_vec[0][tmp_lex.get_value()].get_value()].find_pos(buffer);
                                     if(j >= 0)
-                                        add_lex(LEX_ID, j, tmp_lex.get_value());
+                                        add_lex(LEX_ID, j, ID_tables_vec[0]
+                                                .find_pos(ID_tables_vec[0][tmp_lex.get_value()].get_name()));
                                     else throw Exception("Scanner error: unknown field in struct: ",
                                                          ID_tables_vec[0][tmp_lex.get_value()].get_name());
                                 } else {

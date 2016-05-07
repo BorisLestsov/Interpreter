@@ -30,6 +30,7 @@ public:
     lex_t get_type() const;
     int get_value() const;
     int get_add_value() const;
+    void set_add_value(int val);
 
 
     friend ostream& operator<<(ostream& o, const Lex& lex_par);

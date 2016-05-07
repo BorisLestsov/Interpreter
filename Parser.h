@@ -16,7 +16,7 @@
 using namespace std;
 
 class Parser{
-    const vector<Lex>& lex_vec;
+    vector<Lex>& lex_vec;
     vector<Lex>::const_iterator index;
 
     stack<int> break_stack;
@@ -66,7 +66,7 @@ public:
     vector<ID_table_t>& ID_tables_vec;
     RPN prog;
 
-    Parser(const vector<Lex>& lex_vec_par, vector<ID_table_t>& STRUCT_vec_par);
+    Parser(vector<Lex>& lex_vec_par, vector<ID_table_t>& STRUCT_vec_par);
     void start();
 };
 

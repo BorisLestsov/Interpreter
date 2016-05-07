@@ -97,3 +97,7 @@ void Lex::construct_lex_map(){
 int Lex::get_add_value() const {
     return add_value;
 }
+
+void Lex::set_add_value(int val) {
+    add_value = val;
+}

@@ -68,6 +68,10 @@ int Virtual_Machine::start() {
                         //args.push(Lex(LEX_STRC, -1, 0));
                         tmp_str += ID_tables_vec[c_cmd.get_add_value()][c_cmd.get_value()].get_name();
                         break;
+                    case LEX_STRUCT:
+                        args.push(Lex(LEX_STRUCT, c_cmd.get_value()));
+                        break;
+                    default: throw Exception("Runtime error: unknown ID");
                 }
                 break;
             case LEX_ASSIGN:
