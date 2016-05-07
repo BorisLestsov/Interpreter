@@ -113,8 +113,11 @@ int Virtual_Machine::start() {
                     tmp1 = arg1.get_value();
                     res_t = LEX_NUM;
                 } else if(arg1.get_type() == LEX_STRC){
-                    if(arg1.get_value() >= 0)
-                        tmp_str = ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name();
+                    if(arg1.get_value() >= 0){
+                        if(arg2.get_value() >=0 )
+                            tmp_str = ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name();
+                        else tmp_str.insert(0,ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name());
+                    }
                     res_t = LEX_STRC;
                 } else throw Exception("Runtime error: error in operator +");
 
@@ -126,7 +129,8 @@ int Virtual_Machine::start() {
                     args.push(Lex(LEX_NUM, tmp1 + tmp2));
                 } else {
                     if (arg2.get_type() == LEX_STRC)
-                        tmp_str += ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name();
+                        if(arg2.get_value() >= 0)
+                            tmp_str += ID_tables_vec[arg2.get_add_value()][arg2.get_value()].get_name();
                         res_t = LEX_STRC;
                         args.push(Lex(LEX_STRC, -1));
                 }

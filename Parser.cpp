@@ -17,7 +17,7 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    cout << c_lex << endl;
+    //cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
@@ -182,8 +182,8 @@ void Parser::SWITCH_ID(ID_table_t& table) {
                     get_lex();
                 } else {
                     table[tmp_val].set_assigned(false);
-                    table.table.push_back(ID(LEX_STRC, "", 0));
-                    table[tmp_val].set_value((int) table.table.size() - 1);
+                    table.add_id(ID(LEX_STRC, "", 0));
+                    table[tmp_val].set_value((int) table.get_size() - 1);
                 }
                 if(c_type == LEX_COMMA || c_type == LEX_SEMICOLON)
                     continue;
@@ -380,10 +380,11 @@ void Parser::OP(){
                         ID_tables_vec[0][tmp_val].set_value(prog.get_pos() - 1);
                         ID_tables_vec[0][tmp_val].set_assigned(true);
                     } else {
+                        tmp_type = ID_tables_vec[0][tmp_val].get_type();
                         if (tmp_type == LEX_INT || tmp_type == LEX_BOOL || tmp_type == LEX_STRING ||
                             tmp_type == LEX_STRC)
                             throw Exception("Parser error: attempt to use previously declared ID as Label: ",
-                                            ID_tables_vec[0][c_val].get_name());
+                                            ID_tables_vec[0][tmp_val].get_name());
                         ID_tables_vec[0][tmp_val].set_type(LEX_LABEL);
                         if (ID_tables_vec[0].multiple_declaration(tmp_val))
                             throw Exception("Parser error: multiple declaration of Label: ",
@@ -640,8 +641,8 @@ void Parser::check_assign() {
 }
 
 void Parser::struct_init() {
-    auto ptr = ID_tables_vec[0].table.begin();
-    auto end = ID_tables_vec[0].table.end();
+    auto ptr = ID_tables_vec[0].get_begin();
+    auto end = ID_tables_vec[0].get_end();
     int table_index;
 
     while(ptr != end){

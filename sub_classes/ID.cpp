@@ -148,3 +148,19 @@ int ID_table_t::find_pos(const string id_name) const {
     }
     return -1;
 }
+
+void ID_table_t::add_id(const ID& id_par) {
+    table.push_back(id_par);
+}
+
+int ID_table_t::get_size() {
+    return (int) table.size();
+}
+
+vector<ID>::iterator ID_table_t::get_begin() {
+    return table.begin();
+}
+
+vector<ID>::iterator ID_table_t::get_end() {
+    return table.end();
+}

@@ -36,8 +36,8 @@ public:
 };
 
 class ID_table_t {
-public:
     vector<ID> table;
+public:
 
     int append(const string& new_id, lex_t type_par, int value = 0);
     const ID* find(const string id_name) const;
@@ -47,4 +47,8 @@ public:
     void print_table() const;
     bool multiple_declaration(int id) const;
     void check_labels();
+    void add_id(const ID& id_par);
+    int get_size();
+    vector<ID>::iterator get_begin();
+    vector<ID>::iterator get_end();
 };
