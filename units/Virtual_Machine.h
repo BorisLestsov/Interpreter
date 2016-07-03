@@ -7,6 +7,8 @@
 #include <ID.h>
 #include "RPN.h"
 
+extern int DEBUG_MODE;
+
 class Virtual_Machine {
     RPN& prog;
     vector<Lex>::const_iterator cmd_ptr;

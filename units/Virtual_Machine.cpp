@@ -20,7 +20,8 @@ void Virtual_Machine::get_cmd() {
     c_cmd = *cmd_ptr;
     ++cmd_ptr;
 
-    //cout << setw(2) << i++  << c_cmd << endl;
+    if (DEBUG_MODE)
+        cout << setw(2) << i++  << c_cmd << endl;
 }
 
 bool Virtual_Machine::prog_finished() const {
@@ -120,7 +121,7 @@ int Virtual_Machine::start() {
                     if(arg1.get_value() >= 0){
                         if(arg2.get_value() >=0 )
                             tmp_str = ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name();
-                        else tmp_str.insert(0,ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name());
+                        else tmp_str.insert(0, ID_tables_vec[arg1.get_add_value()][arg1.get_value()].get_name());
                     }
                     res_t = LEX_STRC;
                 } else throw Exception("Runtime error: error in operator +");
@@ -362,7 +363,8 @@ int Virtual_Machine::start() {
                     cmd_ptr = prog.begin() + arg2.get_value();
                 break;
             case LEX_FIN:
-                cout << "$$$$$$ Program finished correctly $$$$$$" << endl;
+                if (DEBUG_MODE)
+                    cout << "$$$$$$ Program finished correctly $$$$$$" << endl;
                 break;
             default: throw Exception("Runtime error: unexpected command: ", Lex::lex_map[c_cmd.get_type()]);
         }

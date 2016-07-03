@@ -89,8 +89,10 @@ void Scanner::start() throw(exception){
     STATE = H_ST;
     do {
         gc();
-        //usleep(250000);
-        //cout << c << ' ';
+        if (DEBUG_MODE) {
+            usleep(SCANNER_DELAY_TIME);
+            cout << c << ' ';
+        }
         switch (STATE) {
             case H_ST:
                 if (c == ' ' || c == '\n' || c == '\t' || c == '\r') break;

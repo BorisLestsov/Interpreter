@@ -17,7 +17,8 @@ void Parser::get_lex() {
     c_val = c_lex.get_value();
     c_add_val = c_lex.get_add_value();
     ++index;
-    cout << c_lex << endl;
+    if (DEBUG_MODE)
+        cout << c_lex << endl;
 }
 
 void Parser::unget_lex() {
@@ -57,15 +58,17 @@ void Parser::DECLARATIONS() {
         get_lex();
     }
     struct_init();
-    //cout << "------------------------------" << endl;
-/*
-    cout << "--------TABLES--------" << endl;
-    int i;
-    for(i = 0; i < ID_tables_vec.size(); ++i){
-        ID_tables_vec[i].print_table();
+
+    if (DEBUG_MODE) {
+        cout << "------------------------------" << endl;
+        cout << "--------TABLES--------" << endl;
+        int i;
+        for (i = 0; i < ID_tables_vec.size(); ++i) {
+            ID_tables_vec[i].print_table();
+        }
+        cout << "------------------------------" << endl;
+        //get_lex();
     }
-    cout << "------------------------------" << endl;*/
-    //get_lex();
     while(c_type == LEX_INT || c_type == LEX_BOOL || c_type == LEX_STRING){
         DECL();
         get_lex();
@@ -313,10 +316,7 @@ void Parser::OP(){
                         throw Exception("Parser error: expected int, bool or string to read, but recieved : ",
                                         ID_tables_vec[c_add_val][c_val].get_type());
                     check_id();
-                    if(c_add_val != 0)
-                        prog.push_back(Lex(RPN_ADDRESS, c_val, ID_tables_vec[0][c_add_val].get_value()));
-                    else
-                        prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
+                    prog.push_back(Lex(RPN_ADDRESS, c_val, c_add_val));
                     get_lex();
                 }
                 else
@@ -396,7 +396,7 @@ void Parser::OP(){
                     OP();
                     break;
                 default:
-                    throw Exception("Parser error: unxpected lexem: ", Lex::lex_map[c_type]);
+                    throw Exception("Parser error: unexpected lexem: ", Lex::lex_map[c_type]);
             }
             break;
         case LEX_BEGIN:
@@ -676,7 +676,8 @@ void Parser::struct_init() {
         ++ptr;
     }
 
-    cout << endl << endl;
+    if (DEBUG_MODE)
+        cout << endl << endl;
     auto lex_ptr = lex_vec.begin();
     auto lex_end = lex_vec.end();
     while(lex_ptr != lex_end){

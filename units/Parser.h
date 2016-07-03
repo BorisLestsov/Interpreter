@@ -13,6 +13,8 @@
 #include "RPN.h"
 #include "ID.h"
 
+extern int DEBUG_MODE;
+
 using namespace std;
 
 class Parser{

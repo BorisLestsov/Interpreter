@@ -9,6 +9,9 @@
 #include "ID.h"
 #include "Exception.h"
 
+extern int DEBUG_MODE;
+extern int SCANNER_DELAY_TIME;
+
 using namespace std;
 
 class Scanner{
